@@ -133,14 +133,7 @@ namespace naive {
         constexpr void fill(const value_type &val) { std::fill(begin(), end(), val); }
 
         constexpr void swap(array &other) { std::swap_ranges(begin(), end(), other.begin()); }
-
-        // print
-
-        friend std::ostream &operator<<(std::ostream &os, const array &arr) {
-            std::for_each(arr.begin(), arr.end(), [&os](const auto &val) { os << val << ' '; });
-            return os;
-        }
-
+        
     private:
         constexpr value_type *allocate(size_type sz) {
             return new value_type[sz];
@@ -153,6 +146,14 @@ namespace naive {
         size_t size_;
         value_type *buffer_;
     };
+
+    // print
+
+    template<class T>
+    std::ostream &operator<<(std::ostream &os, const array<T> &arr) {
+        std::for_each(arr.begin(), arr.end(), [&os](const auto &val) { os << val << ' '; });
+        return os;
+    }
 
     // comparisons
 
