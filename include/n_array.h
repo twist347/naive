@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <iterator>
 #include <algorithm>
 
 namespace naive {
@@ -133,7 +132,7 @@ namespace naive {
         constexpr void fill(const value_type &val) { std::fill(begin(), end(), val); }
 
         constexpr void swap(array &other) { std::swap_ranges(begin(), end(), other.begin()); }
-        
+
     private:
         constexpr value_type *allocate(size_type sz) {
             return new value_type[sz];
@@ -143,7 +142,7 @@ namespace naive {
             delete[] buffer;
         }
 
-        size_t size_;
+        size_type size_;
         value_type *buffer_;
     };
 
