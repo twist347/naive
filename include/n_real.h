@@ -1,28 +1,11 @@
 #pragma once
 
-#include <concepts>
 #include <iostream>
+#include "utils.h"
 
 namespace naive {
-    namespace detail {
-        template<class T>
-        concept is_floating = std::is_floating_point_v<T>;
 
-        template<is_floating T, is_floating U>
-        constexpr auto to(U u) -> T {
-            return static_cast<T>(u);
-        }
-
-        template<is_floating T>
-        auto eps = to<T>(1e-10);
-
-        template<is_floating T>
-        constexpr auto eq(const T &lhs, const T &rhs) -> bool {
-            return std::abs(lhs - rhs) < eps<T>;
-        }
-    }
-
-    template<detail::is_floating T>
+    template<utils::is_floating T>
     class real {
     public:
         using value_type = T;
@@ -48,18 +31,10 @@ namespace naive {
         }
 
         real &operator/=(const real &r) {
-            if (detail::eq<value_type>(r.value_, detail::to<value_type>(0.0))) {
+            if (utils::eq<value_type>(r.value_, utils::to<value_type>(0.0))) {
                 throw std::invalid_argument("division by zero");
             }
             value_ /= r.value_;
-            return *this;
-        }
-
-        real &operator%=(const real &r) {
-            if (detail::eq<value_type>(r.value_, detail::to<value_type>(0.0))) {
-                throw std::invalid_argument("division by zero");
-            }
-            value_ %= r.value_;
             return *this;
         }
 
@@ -90,59 +65,52 @@ namespace naive {
             return value_;
         }
 
-        template<detail::is_floating U>
+        template<utils::is_floating U>
         friend std::ostream &operator<<(std::ostream &os, const real<U> &r);
 
-        template<detail::is_floating U>
+        template<utils::is_floating U>
         friend std::istream &operator>>(std::istream &is, real<U> &r);
 
     private:
         value_type value_;
     };
 
-    template<detail::is_floating T>
+    template<utils::is_floating T>
     real<T> operator+(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result += rhs;
         return result;
     }
 
-    template<detail::is_floating T>
+    template<utils::is_floating T>
     real<T> operator-(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result -= rhs;
         return result;
     }
 
-    template<detail::is_floating T>
+    template<utils::is_floating T>
     real<T> operator*(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result *= rhs;
         return result;
     }
 
-    template<detail::is_floating T>
+    template<utils::is_floating T>
     real<T> operator/(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result /= rhs;
         return result;
     }
 
-    template<detail::is_floating T>
-    real<T> operator%(const real<T> &lhs, const real<T> &rhs) {
-        auto result = lhs;
-        result %= rhs;
-        return result;
-    }
-
-    template<detail::is_floating T>
+    template<utils::is_floating T>
     std::ostream &operator<<(std::ostream &os, const real<T> &r) {
         os << r.value_;
         return os;
     }
 
-    template<detail::is_floating U>
-    std::istream &operator>>(std::istream &is, real<U> &r) {
+    template<utils::is_floating T>
+    std::istream &operator>>(std::istream &is, real<T> &r) {
         is >> r.value_;
         return is;
     }

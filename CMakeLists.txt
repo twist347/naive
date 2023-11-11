@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.26)
+
 project(naive)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(naive main.cpp)
-
-target_include_directories(naive PRIVATE include)
+add_subdirectory(test/n_array_test)

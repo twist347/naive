@@ -37,6 +37,7 @@ namespace naive {
         }
 
         constexpr array &operator=(const array &other) {
+            // copy and swap idiom
             array copy(other);
             std::swap(copy, *this);
             return *this;
@@ -60,7 +61,7 @@ namespace naive {
 
         constexpr ~array() {
             size_ = 0;
-            delete[] buffer_;
+            deallocate(buffer_);
         }
 
         // access
