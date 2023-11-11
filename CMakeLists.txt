@@ -5,3 +5,4 @@ project(naive)
 set(CMAKE_CXX_STANDARD 23)
 
 add_subdirectory(test/n_array_test)
+add_subdirectory(test/n_real_test)
