@@ -65,6 +65,8 @@ namespace naive {
             return value_;
         }
 
+        auto operator<=>(const real &other) const = default;
+
         template<utils::is_floating U>
         friend std::ostream &operator<<(std::ostream &os, const real<U> &r);
 
