@@ -3,7 +3,9 @@ project(test_naive_array)
 
 set(CMAKE_CXX_STANDARD 23)
 
-file(GLOB_RECURSE SOURCES ./main.cpp)
+file(GLOB SOURCES ./main.cpp)
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(test_naive_array ${SOURCES})
 

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include "../../include/n_real.h"
+#include "n_array.h"
+#include "n_real.h"
 
 TEST(A, B) {
     naive::real r{3.14};
