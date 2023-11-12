@@ -1,13 +1,12 @@
 #pragma once
 
-#include <iostream>
-#include <algorithm>
 #include <n_utils.h>
+#include <algorithm>
 
 namespace naive {
 
-    template<concepts::is_array_el T>
-    class array {
+    template<class T>
+    class vector {
     public:
         using value_type = T;
         using size_type = std::size_t;
@@ -21,23 +20,27 @@ namespace naive {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = std::ptrdiff_t;
 
-        constexpr explicit array(size_type size) : size_(size), buffer_(allocate(size_)) {}
+        constexpr vector() : size_(naive::utils::to<size_type>(0)), capacity_(naive::utils::to<size_type>(0)) {}
 
-        constexpr array(size_type size, const value_type &val) : size_(size), buffer_(allocate(size_)) {
+        constexpr explicit vector(size_type size) : size_(size), capacity_(size_), buffer_(allocate(size_)) {}
+
+        constexpr vector(size_type size, const value_type val) :
+                size_(size), capacity_(size_), buffer_(allocate(size_)) {
             std::fill(begin(), end(), val);
         }
 
-        constexpr array(std::initializer_list<value_type> il) : size_(il.size()), buffer_(allocate(size_)) {
+        constexpr vector(std::initializer_list<value_type> il) :
+                size_(il.size()), capacity_(il.size()), buffer_(allocate(size_)) {
             std::copy(il.begin(), il.end(), begin());
         }
 
-        constexpr array(const array &other) : size_(other.size_) {
-            auto new_buffer = allocate(size_);
+        constexpr vector(const vector &other) : size_(other.size_), capacity_(other.capacity_) {
+            auto new_buffer = allocate(capacity_);
             std::copy(other.buffer_, other.buffer_ + other.size_, new_buffer);
             buffer_ = new_buffer;
         }
 
-        constexpr array &operator=(const array &other) {
+        constexpr vector &operator=(const vector &other) {
             // TODO: if other.size_ == size_
             // copy and swap idiom
             auto copy = other;
@@ -45,29 +48,32 @@ namespace naive {
             return *this;
         }
 
-        constexpr array(array &&other) noexcept: size_(other.size_), buffer_(other.buffer_) {
-            other.size_ = 0;
+        constexpr vector(vector &&other) noexcept: size_(other.size_), capacity_(other.capacity_),
+                                                   buffer_(other.buffer_) {
+            other.size_ = naive::utils::to<size_type>(0);
+            other.capacity_ = naive::utils::to<size_type>(0);
             other.buffer_ = nullptr;
         }
 
-        constexpr array &operator=(array &&other) noexcept {
+        constexpr vector &operator=(vector &&other) noexcept {
             deallocate(buffer_);
 
             std::swap(size_, other.size_);
+            std::swap(capacity_, other.capacity_);
             std::swap(buffer_, other.buffer_);
 
             other.size_ = naive::utils::to<size_type>(0);
+            other.capacity_ = naive::utils::to<size_type>(0);
             other.buffer_ = nullptr;
 
             return *this;
         }
 
-        constexpr ~array() {
-            size_ = naive::utils::to<size_type>(0);
+        constexpr ~vector() {
             deallocate(buffer_);
         }
 
-        // element access
+        // access
 
         constexpr reference operator[](size_type idx) { return buffer_[idx]; }
 
@@ -99,6 +105,7 @@ namespace naive {
 
         constexpr const_reference back() const noexcept { return buffer_[static_cast<size_type>(size_ - 1)]; }
 
+
         // iterators
 
         constexpr iterator begin() noexcept { return iterator(data()); }
@@ -129,13 +136,9 @@ namespace naive {
 
         constexpr size_type size() const noexcept { return size_; }
 
+        constexpr size_type capacity() const noexcept { return capacity_; }
+
         constexpr bool empty() const noexcept { return size() == naive::utils::to<size_type>(0); }
-
-        // operations
-
-        constexpr void fill(const value_type &val) { std::fill(begin(), end(), val); }
-
-        constexpr void swap(array &other) { std::swap_ranges(begin(), end(), other.begin()); }
 
     private:
         constexpr value_type *allocate(size_type sz) {
@@ -147,21 +150,15 @@ namespace naive {
         }
 
         size_type size_;
+        size_type capacity_;
         value_type *buffer_;
     };
 
-    // i/o
+    // print
 
     template<class T>
-    std::ostream &operator<<(std::ostream &os, const array<T> &arr) {
+    std::ostream &operator<<(std::ostream &os, const vector<T> &arr) {
         std::for_each(arr.begin(), arr.end(), [&os](const auto &val) { os << val << ' '; });
         return os;
-    }
-
-    // comparisons
-
-    template<class T>
-    bool operator==(const array<T> &lhs, const array<T> &rhs) {
-        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
 }

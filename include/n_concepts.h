@@ -7,6 +7,12 @@ namespace naive::concepts {
     concept is_floating = std::is_floating_point_v<std::remove_cvref_t<T>>;
 
     template<class T>
+    concept is_integral = std::is_integral_v<std::remove_cvref_t<T>>;
+
+    template<class T>
+    concept is_numeric = is_integral<T> || is_floating<T>;
+
+    template<class T>
     concept is_eq_comparable = requires(std::remove_cvref_t<T> a, std::remove_cvref_t<T> b) {
         { a == b } -> std::convertible_to<bool>;
         { a != b } -> std::convertible_to<bool>;

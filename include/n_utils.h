@@ -5,7 +5,7 @@
 #include <n_concepts.h>
 
 namespace naive::utils {
-    template<concepts::is_floating T, concepts::is_floating U>
+    template<concepts::is_numeric T, concepts::is_numeric U>
     constexpr auto to(U u) -> T {
         return static_cast<T>(u);
     }
