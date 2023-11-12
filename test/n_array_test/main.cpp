@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "n_array.h"
+#include <n_array.h>
 
 TEST(TestNaiveArray, SimpleTest) {
     naive::array<int> arr = {1, 2, 3};

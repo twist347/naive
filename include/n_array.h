@@ -2,10 +2,11 @@
 
 #include <iostream>
 #include <algorithm>
+#include <n_concepts.h>
 
 namespace naive {
 
-    template<class T>
+    template<concepts::is_array_el T>
     class array {
     public:
         using value_type = T;

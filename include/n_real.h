@@ -1,11 +1,11 @@
 #pragma once
 
 #include <iostream>
-#include "utils.h"
+#include <n_utils.h>
 
 namespace naive {
 
-    template<utils::is_floating T>
+    template<concepts::is_floating T>
     class real {
     public:
         using value_type = T;
@@ -31,7 +31,7 @@ namespace naive {
         }
 
         real &operator/=(const real &r) {
-            if (utils::eq<value_type>(r.value_, utils::to<value_type>(0.0))) {
+            if (utils::eq_flt<value_type>(r.value_, utils::to<value_type>(0.0))) {
                 throw std::invalid_argument("division by zero");
             }
             value_ /= r.value_;
@@ -67,51 +67,51 @@ namespace naive {
 
         auto operator<=>(const real &other) const = default;
 
-        template<utils::is_floating U>
+        template<concepts::is_floating U>
         friend std::ostream &operator<<(std::ostream &os, const real<U> &r);
 
-        template<utils::is_floating U>
+        template<concepts::is_floating U>
         friend std::istream &operator>>(std::istream &is, real<U> &r);
 
     private:
         value_type value_;
     };
 
-    template<utils::is_floating T>
+    template<concepts::is_floating T>
     real<T> operator+(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result += rhs;
         return result;
     }
 
-    template<utils::is_floating T>
+    template<concepts::is_floating T>
     real<T> operator-(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result -= rhs;
         return result;
     }
 
-    template<utils::is_floating T>
+    template<concepts::is_floating T>
     real<T> operator*(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result *= rhs;
         return result;
     }
 
-    template<utils::is_floating T>
+    template<concepts::is_floating T>
     real<T> operator/(const real<T> &lhs, const real<T> &rhs) {
         auto result = lhs;
         result /= rhs;
         return result;
     }
 
-    template<utils::is_floating T>
+    template<concepts::is_floating T>
     std::ostream &operator<<(std::ostream &os, const real<T> &r) {
         os << r.value_;
         return os;
     }
 
-    template<utils::is_floating T>
+    template<concepts::is_floating T>
     std::istream &operator>>(std::istream &is, real<T> &r) {
         is >> r.value_;
         return is;

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "n_real.h"
+#include <n_real.h>
 
 TEST(TestNaiveReal, SimpleTest) {
     naive::real r{3.14};
