@@ -21,6 +21,8 @@ namespace naive {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = std::ptrdiff_t;
 
+        constexpr array() : size_(utils::to<size_type>(0)), buffer_(nullptr) {}
+
         constexpr explicit array(size_type size) : size_(size), buffer_(allocate(size_)) {}
 
         constexpr array(size_type size, const value_type &val) : size_(size), buffer_(allocate(size_)) {
@@ -91,13 +93,13 @@ namespace naive {
             return buffer_[idx];
         }
 
-        constexpr reference front() noexcept { return buffer_[static_cast<size_type>(0)]; }
+        constexpr reference front() noexcept { return buffer_[utils::to<size_type>(0)]; }
 
-        constexpr const_reference front() const noexcept { return buffer_[static_cast<size_type>(0)]; }
+        constexpr const_reference front() const noexcept { return buffer_[utils::to<size_type>(0)]; }
 
-        constexpr reference back() noexcept { return buffer_[static_cast<size_type>(size_ - 1)]; }
+        constexpr reference back() noexcept { return buffer_[utils::to<size_type>(size_ - 1)]; }
 
-        constexpr const_reference back() const noexcept { return buffer_[static_cast<size_type>(size_ - 1)]; }
+        constexpr const_reference back() const noexcept { return buffer_[utils::to<size_type>(size_ - 1)]; }
 
         // iterators
 
