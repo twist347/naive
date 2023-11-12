@@ -1,0 +1,4 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/snap/clion/250/bin/ninja/linux/x64/ninja -DCMAKE_CXX_COMPILER=/usr/bin/g++ -G Ninja -S /home/emir/my/cpp/naive -B /home/emir/my/cpp/naive/cmake-build-release
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/emir/my/cpp/naive/cmake-build-release

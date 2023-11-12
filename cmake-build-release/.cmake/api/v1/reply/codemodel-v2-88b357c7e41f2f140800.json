@@ -1,0 +1,123 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Release-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.26"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "test/n_array_test",
+					"jsonFile" : "directory-test.n_array_test-Release-76f6f5ead29a4ee527d9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.26"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "test/n_array_test",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "test/n_real_test",
+					"jsonFile" : "directory-test.n_real_test-Release-fb0468d65563bb999a09.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.26"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "test/n_real_test",
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "naive"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "test_naive_array",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "test_naive_real",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "test_naive_array::@17f39a249a8cce9c1c2a",
+					"jsonFile" : "target-test_naive_array-Release-882c21bc12cb27184728.json",
+					"name" : "test_naive_array",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_naive_real::@1ef691c07a960cb8f4a5",
+					"jsonFile" : "target-test_naive_real-Release-14aea9eae12f11a0a297.json",
+					"name" : "test_naive_real",
+					"projectIndex" : 2
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/emir/my/cpp/naive/cmake-build-release",
+		"source" : "/home/emir/my/cpp/naive"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
