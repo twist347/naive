@@ -1,7 +1,0 @@
-# ninja log v5
-0	469	1699627631188084344	CMakeFiles/naive.dir/main.cpp.o	638c543d4058fbb7
-0	736	1699706844860833422	test/n_array_test/CMakeFiles/test.dir/main.cpp.o	86e5e7006328068c
-737	790	1699646528096156898	test/n_array_test/test_n_array	53c1e8704066999b
-0	736	1699646528044154790	test/n_array_test/CMakeFiles/test_n_array.dir/main.cpp.o	1ea08394b96822cb
-469	504	1699627631220085514	naive	f7ce92f60b930d5a
-736	780	1699706844900834837	test/n_array_test/test	b160d9401319e0e2

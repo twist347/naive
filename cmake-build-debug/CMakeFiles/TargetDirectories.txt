@@ -1,8 +1,0 @@
-/home/emir/my/cpp/naive/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/emir/my/cpp/naive/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/emir/my/cpp/naive/cmake-build-debug/test/n_array_test/CMakeFiles/test_naive_array.dir
-/home/emir/my/cpp/naive/cmake-build-debug/test/n_array_test/CMakeFiles/edit_cache.dir
-/home/emir/my/cpp/naive/cmake-build-debug/test/n_array_test/CMakeFiles/rebuild_cache.dir
-/home/emir/my/cpp/naive/cmake-build-debug/test/n_real_test/CMakeFiles/test_naive_real.dir
-/home/emir/my/cpp/naive/cmake-build-debug/test/n_real_test/CMakeFiles/edit_cache.dir
-/home/emir/my/cpp/naive/cmake-build-debug/test/n_real_test/CMakeFiles/rebuild_cache.dir
