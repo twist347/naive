@@ -189,13 +189,50 @@ TEST(TestNaiveArray, ConstReverseIteratorsTest) {
     }
 }
 
-TEST(TestNaiveArray, SizeandEmptyTest) {
+TEST(TestNaiveArray, SizeandEmptyMethodsTest) {
     naive::array<int> earr, arr{1, 2, 3};
     ASSERT_EQ(earr.size(), naive::utils::to<decltype(earr)::size_type>(0));
     ASSERT_TRUE(earr.empty());
 
     ASSERT_EQ(arr.size(), naive::utils::to<decltype(earr)::size_type>(3));
     ASSERT_FALSE(arr.empty());
+}
+
+TEST(TestNaiveArray, FillMethodTest) {
+    naive::array<int> arr(3), other{1, 2, 3, 4, 5};
+    auto val = 25;
+    arr.fill(val);
+    other.fill(val);
+    for (auto i: arr) {
+        ASSERT_EQ(i, val);
+    }
+
+    for (auto i: other) {
+        ASSERT_EQ(i, val);
+    }
+}
+
+TEST(TestNaiveArray, SwapMethodTest) {
+    naive::array<int> arr{1, 2, 3}, other{1, 2, 3, 4, 5};
+    auto arr_sz = arr.size(), other_sz = other.size();
+    arr.swap(other);
+    auto val = 0;
+    ASSERT_EQ(arr.size(), other_sz);
+    ASSERT_EQ(other.size(), arr_sz);
+    for (auto i: arr) {
+        ASSERT_EQ(i, ++val);
+    }
+    val = 0;
+    for (auto i: other) {
+        ASSERT_EQ(i, ++val);
+    }
+}
+
+TEST(TestNaiveArray, ThreeWayComparisonOperatorTest) {
+    naive::array<int> arr{1, 2, 3}, other1{1, 2, 3}, other2{1, 2, 3, 4, 5}, other3{4, 5, 6};
+    ASSERT_EQ(arr, other1);
+    ASSERT_NE(arr, other2);
+    ASSERT_NE(arr, other3);
 }
 
 int main(int argc, char **argv) {

@@ -137,7 +137,10 @@ namespace naive {
 
         constexpr void fill(const value_type &val) { std::fill(begin(), end(), val); }
 
-        constexpr void swap(array &other) { std::swap_ranges(begin(), end(), other.begin()); }
+        constexpr void swap(array &other) {
+            std::swap(size_, other.size_);
+            std::swap_ranges(begin(), end(), other.begin());
+        }
 
     private:
         constexpr value_type *allocate(size_type sz) {
@@ -152,7 +155,7 @@ namespace naive {
         value_type *buffer_;
     };
 
-    // i/o
+    // print
 
     template<class T>
     std::ostream &operator<<(std::ostream &os, const array<T> &arr) {
@@ -164,6 +167,14 @@ namespace naive {
 
     template<class T>
     bool operator==(const array<T> &lhs, const array<T> &rhs) {
+        if (lhs.size() != rhs.size()) {
+            return false;
+        }
         return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    }
+
+    template<class T>
+    bool operator!=(const array<T> &lhs, const array<T> &rhs) {
+        return !(lhs == rhs);
     }
 }
