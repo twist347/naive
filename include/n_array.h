@@ -23,18 +23,18 @@ namespace naive {
 
         constexpr array() : size_(utils::to<size_type>(0)), buffer_(nullptr) {}
 
-        constexpr explicit array(size_type size) : size_(size), buffer_(allocate(size_)) {}
+        constexpr explicit array(size_type size) : size_(size), buffer_(construct(size_)) {}
 
-        constexpr array(size_type size, const value_type &val) : size_(size), buffer_(allocate(size_)) {
+        constexpr array(size_type size, const value_type &val) : size_(size), buffer_(construct(size_)) {
             std::fill(begin(), end(), val);
         }
 
-        constexpr array(std::initializer_list<value_type> il) : size_(il.size()), buffer_(allocate(size_)) {
+        constexpr array(std::initializer_list<value_type> il) : size_(il.size()), buffer_(construct(size_)) {
             std::copy(il.begin(), il.end(), begin());
         }
 
         constexpr array(const array &other) : size_(other.size_) {
-            auto new_buffer = allocate(size_);
+            auto new_buffer = construct(size_);
             std::copy(other.buffer_, other.buffer_ + other.size_, new_buffer);
             buffer_ = new_buffer;
         }
@@ -53,7 +53,7 @@ namespace naive {
         }
 
         constexpr array &operator=(array &&other) noexcept {
-            deallocate(buffer_);
+            destroy(buffer_);
 
             std::swap(size_, other.size_);
             std::swap(buffer_, other.buffer_);
@@ -66,7 +66,7 @@ namespace naive {
 
         constexpr ~array() {
             size_ = naive::utils::to<size_type>(0);
-            deallocate(buffer_);
+            destroy(buffer_);
         }
 
         // element access
@@ -143,11 +143,11 @@ namespace naive {
         }
 
     private:
-        constexpr value_type *allocate(size_type sz) {
-            return new value_type[sz];
+        constexpr pointer construct(size_type size) {
+            return new value_type[size];
         }
 
-        constexpr void deallocate(value_type *buffer) {
+        constexpr void destroy(pointer buffer) {
             delete[] buffer;
         }
 
@@ -157,7 +157,7 @@ namespace naive {
 
     // print
 
-    template<class T>
+    template<concepts::is_array_el T>
     std::ostream &operator<<(std::ostream &os, const array<T> &arr) {
         std::for_each(arr.begin(), arr.end(), [&os](const auto &val) { os << val << ' '; });
         return os;
@@ -165,16 +165,16 @@ namespace naive {
 
     // comparisons
 
-    template<class T>
-    bool operator==(const array<T> &lhs, const array<T> &rhs) {
+    template<concepts::is_array_el T>
+    constexpr bool operator==(const array<T> &lhs, const array<T> &rhs) {
         if (lhs.size() != rhs.size()) {
             return false;
         }
         return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
 
-    template<class T>
-    bool operator!=(const array<T> &lhs, const array<T> &rhs) {
+    template<concepts::is_array_el T>
+    constexpr bool operator!=(const array<T> &lhs, const array<T> &rhs) {
         return !(lhs == rhs);
     }
 }

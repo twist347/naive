@@ -1,6 +1,7 @@
 #pragma once
 
 #include <n_utils.h>
+#include <n_allocator.h>
 #include <algorithm>
 
 namespace naive {
@@ -13,29 +14,29 @@ namespace naive {
         using reference = value_type &;
         using const_reference = const value_type &;
         using pointer = value_type *;
-        using const_pointer = const value_type *;
-        using iterator = value_type *;
-        using const_iterator = const value_type *;
+        using const_pointer = const pointer;
+        using iterator = pointer;
+        using const_iterator = const pointer;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = std::ptrdiff_t;
 
         constexpr vector() : size_(naive::utils::to<size_type>(0)), capacity_(naive::utils::to<size_type>(0)) {}
 
-        constexpr explicit vector(size_type size) : size_(size), capacity_(size_), buffer_(allocate(size_)) {}
+        constexpr explicit vector(size_type size) : size_(size), capacity_(size_), buffer_(new value_type[size_]) {}
 
         constexpr vector(size_type size, const value_type val) :
-                size_(size), capacity_(size_), buffer_(allocate(size_)) {
+                size_(size), capacity_(size_), buffer_(new value_type[size_]) {
             std::fill(begin(), end(), val);
         }
 
         constexpr vector(std::initializer_list<value_type> il) :
-                size_(il.size()), capacity_(il.size()), buffer_(allocate(size_)) {
+                size_(il.size()), capacity_(il.size()), buffer_(new value_type[size_]) {
             std::copy(il.begin(), il.end(), begin());
         }
 
         constexpr vector(const vector &other) : size_(other.size_), capacity_(other.capacity_) {
-            auto new_buffer = allocate(capacity_);
+            auto new_buffer = new value_type[capacity_];
             std::copy(other.buffer_, other.buffer_ + other.size_, new_buffer);
             buffer_ = new_buffer;
         }
@@ -56,8 +57,6 @@ namespace naive {
         }
 
         constexpr vector &operator=(vector &&other) noexcept {
-            deallocate(buffer_);
-
             std::swap(size_, other.size_);
             std::swap(capacity_, other.capacity_);
             std::swap(buffer_, other.buffer_);
@@ -70,7 +69,8 @@ namespace naive {
         }
 
         constexpr ~vector() {
-            deallocate(buffer_);
+            destroy(buffer_, buffer_ + size_);
+            ::operator delete(buffer_);
         }
 
         // access
@@ -140,18 +140,66 @@ namespace naive {
 
         constexpr bool empty() const noexcept { return size() == naive::utils::to<size_type>(0); }
 
-    private:
-        constexpr value_type *allocate(size_type sz) {
-            return new value_type[sz];
+        constexpr void reserve(size_type new_cap) {
+            if (new_cap <= capacity_) {
+                return;
+            }
+            auto new_buffer = allocate(new_cap * sizeof(value_type));
+            for (size_type i = 0; i < size_; ++i) {
+                construct(new_buffer + i, std::move(buffer_[i]));
+                destroy(new_buffer + i);
+            }
+            capacity_ = new_cap;
+            buffer_ = new_buffer;
         }
 
-        constexpr void deallocate(value_type *buffer) {
-            delete[] buffer;
+        // modifiers
+
+        constexpr void resize(size_type size) {
+            if (size_ == size) {
+                return;
+            } else if (size > size_) {
+                auto new_buffer = allocate(size * sizeof(value_type));
+                for (size_type i = 0; i < size_; ++i) {
+                    construct(new_buffer + i, std::move(buffer_[i]));
+                    destroy(new_buffer + i);
+                }
+                for (size_type i = size_; i < size; ++i) {
+                    construct(buffer_ + i);
+                }
+                size_ = size;
+                capacity_ = size;
+                buffer_ = new_buffer;
+            } else {
+                destroy(buffer_ + size, buffer_ + size_);
+                size_ = size;
+            }
+        }
+
+    private:
+        pointer allocate(size_type size) {
+            return size == 0 ? nullptr : static_cast<pointer>(::operator new(size * sizeof(value_type)));
+        }
+
+        template<class ... Args>
+        constexpr void construct(pointer ptr, Args &&... args) {
+            new(ptr) value_type(std::forward<Args>(args)...);
+        }
+
+        constexpr void destroy(pointer ptr) {
+            ptr->~value_type();
+        }
+
+        template<class FwdIter>
+        void destroy(FwdIter first, FwdIter last) noexcept {
+            while (first++ != last) {
+                destroy(&*first);
+            }
         }
 
         size_type size_;
         size_type capacity_;
-        value_type *buffer_;
+        pointer buffer_;
     };
 
     // print

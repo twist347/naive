@@ -228,7 +228,7 @@ TEST(TestNaiveArray, SwapMethodTest) {
     }
 }
 
-TEST(TestNaiveArray, ThreeWayComparisonOperatorTest) {
+TEST(TestNaiveArray, EqualOperatorTest) {
     naive::array<int> arr{1, 2, 3}, other1{1, 2, 3}, other2{1, 2, 3, 4, 5}, other3{4, 5, 6};
     ASSERT_EQ(arr, other1);
     ASSERT_NE(arr, other2);
