@@ -17,16 +17,17 @@ TEST(TestNaiveArray, TraitsTest) {
     ASSERT_TRUE(1);
 }
 
+auto nil = naive::utils::to<naive::array<int>::size_type>(0);
 
 TEST(TestNaiveArray, DefaultConstructorTest) {
     naive::array<int> arr;
-    ASSERT_EQ(arr.size(), naive::utils::to<decltype(arr)::size_type>(0));
+    ASSERT_EQ(arr.size(), nil);
 }
 
 
 TEST(TestNaiveArray, SizeConstructorTest) {
     naive::array<int> arr(3);
-    ASSERT_EQ(arr.size(), naive::utils::to<decltype(arr)::size_type>(3));
+    ASSERT_EQ(arr.size(), nil);
 }
 
 TEST(TestNaiveArray, SizeAndValConstructorTest) {
@@ -68,7 +69,7 @@ TEST(TestNaiveArray, MoveConstructorTest) {
     naive::array<int> arr{1, 2, 3, 4, 5};
     auto sz = arr.size();
     auto other = std::move(arr);
-    ASSERT_EQ(arr.size(), naive::utils::to<decltype(arr)::size_type>(0));
+    ASSERT_EQ(arr.size(), nil);
     ASSERT_EQ(other.size(), sz);
     for (size_t i = 0; i < other.size(); ++i) {
         ASSERT_EQ(other[i], i + 1);
@@ -80,7 +81,7 @@ TEST(TestNaiveArray, MoveAssignmentTest) {
     naive::array<int> other{1, 2, 3};
     auto arr_sz = arr.size(), other_arr = other.size();
     other = std::move(arr);
-    ASSERT_EQ(arr.size(), naive::utils::to<decltype(arr)::size_type>(0));
+    ASSERT_EQ(arr.size(), nil);
     ASSERT_EQ(other.size(), arr_sz);
     for (size_t i = 0; i < other.size(); ++i) {
         ASSERT_EQ(other[i], i + 1);
@@ -191,7 +192,7 @@ TEST(TestNaiveArray, ConstReverseIteratorsTest) {
 
 TEST(TestNaiveArray, SizeandEmptyMethodsTest) {
     naive::array<int> earr, arr{1, 2, 3};
-    ASSERT_EQ(earr.size(), naive::utils::to<decltype(earr)::size_type>(0));
+    ASSERT_EQ(earr.size(), nil);
     ASSERT_TRUE(earr.empty());
 
     ASSERT_EQ(arr.size(), naive::utils::to<decltype(earr)::size_type>(3));

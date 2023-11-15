@@ -14,20 +14,21 @@ namespace naive {
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
 
-        constexpr pointer allocate(size_type size) {
-            return size == 0 ? nullptr : static_cast<pointer>(::operator new(size * sizeof(value_type)));
+        constexpr pointer allocate(size_type n) {
+            return n == 0 ? nullptr : static_cast<pointer>(::operator new(n * sizeof(value_type)));
         }
 
         constexpr void deallocate(pointer ptr, size_type size) {
-            operator delete[](ptr);
+            if (size == 0) operator delete(ptr);
+            else operator delete[](ptr);
         }
 
         template<class ... Args>
-        constexpr void construct(pointer ptr, const Args &&... args) {
+        constexpr void construct(pointer ptr, Args &&... args) {
             new(ptr) value_type(std::forward<Args>(args)...);
         }
 
-        constexpr void destroy(pointer ptr) {
+        constexpr void destruct(pointer ptr) {
             ptr->~value_type();
         }
     };
