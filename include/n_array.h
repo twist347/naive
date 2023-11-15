@@ -53,6 +53,7 @@ namespace naive {
         }
 
         constexpr array &operator=(array &&other) noexcept {
+            if (this == &other) return *this;
             destroy(buffer_);
 
             std::swap(size_, other.size_);

@@ -28,7 +28,7 @@ namespace naive {
         constexpr explicit vector(size_type size) :
                 size_(size), capacity_(size_), buffer_(call_alloc_and_construct(size_)) {}
 
-        constexpr vector(size_type size, const_reference val) :
+        constexpr vector(size_type size, const value_type &val) :
                 size_(size), capacity_(size_), buffer_(alloc.allocate(size_)) {
             for (size_type i = 0; i < size_; ++i) {
                 alloc.construct(buffer_ + i, val);
@@ -67,6 +67,7 @@ namespace naive {
         }
 
         constexpr vector &operator=(vector &&other) noexcept {
+            if (this == &other) return *this;
             call_destruct_and_dealloc(buffer_, capacity_);
             std::swap(size_, other.size_);
             std::swap(capacity_, other.capacity_);
@@ -118,7 +119,6 @@ namespace naive {
 
         constexpr const_reference back() const noexcept { return buffer_[static_cast<size_type>(size_ - 1)]; }
 
-
         // iterators
 
         constexpr iterator begin() noexcept { return iterator(data()); }
@@ -162,7 +162,7 @@ namespace naive {
                 alloc.construct(new_buffer + i, std::move(buffer_[i]));
                 alloc.destruct(buffer_ + i);
             }
-            deallocate(buffer_, size_);
+            alloc.deallocate(buffer_, size_);
             capacity_ = new_cap;
             buffer_ = new_buffer;
         }
@@ -182,6 +182,28 @@ namespace naive {
         }
 
         // modifiers
+
+        constexpr void clear() noexcept {
+            for (size_type i = 0; i < size_; ++i) {
+                alloc.destruct(buffer_ + i);
+            }
+            size_ = 0;
+        }
+
+        constexpr void push_back(const value_type &val) {
+            push_back(val);
+        }
+
+        template<class U>
+        constexpr void push_back(U &&val) {
+            push_back_impl(std::forward<U>(val));
+        }
+
+        template<class ... Args>
+        constexpr reference emplace_back(Args &&... args) {
+            push_back_impl(std::forward<Args>(args)...);
+            return back();
+        }
 
         constexpr void resize(size_type new_size) {
             if (size_ == new_size) {
@@ -208,6 +230,14 @@ namespace naive {
         }
 
     private:
+        template<class ... Args>
+        void push_back_impl(Args && ... args) {
+            if (size_ == capacity_) {
+                reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+            }
+            alloc.construct(buffer_ + size_, std::forward<Args>(args)...);
+            ++size_;
+        }
 
         template<class ... Args>
         pointer call_alloc_and_construct(size_type n_obj, Args &&... args) {
@@ -224,30 +254,6 @@ namespace naive {
             }
             alloc.deallocate(ptr, n_obj);
         }
-
-//        pointer allocate(size_type size) {
-//            return size == 0 ? nullptr : static_cast<pointer>(::operator new(size * sizeof(value_type)));
-//        }
-//
-//        constexpr void deallocate(pointer ptr, size_type size) {
-//            operator delete[](ptr);
-//        }
-//
-//        template<class ... Args>
-//        constexpr void construct(pointer ptr, Args &&... args) {
-//            new(ptr) value_type(std::forward<Args>(args)...);
-//        }
-//
-//        constexpr void destruct(pointer ptr) {
-//            ptr->~value_type();
-//        }
-//
-//        template<class FwdIter>
-//        void destruct(FwdIter first, FwdIter last) noexcept {
-//            while (first++ != last) {
-//                destruct(&*first);
-//            }
-//        }
 
         Alloc alloc;
         size_type size_;

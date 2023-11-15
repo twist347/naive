@@ -93,6 +93,29 @@ TEST(TestNaiveVector, MoveAssignmentTest) {
     }
 }
 
+TEST(TestNaiveVector, SubscriptOperatorTest) {
+    naive::vector<int> v{1, 2, 3};
+    const naive::vector<int> cv{1, 2, 3, 4, 5};
+    ASSERT_EQ(v[2], 3);
+    ASSERT_EQ(cv[1], 2);
+    decltype(v)::value_type val = 812;
+    v[2] = val;
+    ASSERT_EQ(v[2], val);
+}
+
+TEST(TestNaiveArray, DataMethodTest) {
+    naive::vector<int> v{1, 2, 3};
+    const naive::vector<int> cv{1, 2, 3, 4, 5};
+    auto d = v.data();
+    auto cd = cv.data();
+    ASSERT_EQ(*(d + 2), 3);
+    ASSERT_EQ(*(cd + 1), 2);
+    decltype(v)::value_type val = 812;
+    *(d + 2) = val;
+    ASSERT_EQ(v[2], val);
+    ASSERT_EQ(*(d + 2), val);
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
