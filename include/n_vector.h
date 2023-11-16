@@ -190,6 +190,67 @@ namespace naive {
             size_ = 0;
         }
 
+        constexpr iterator insert(const_iterator pos, value_type &&val) {
+            auto idx = std::distance(buffer_, pos);
+            idx--;
+            if (size_ == capacity_) {
+                auto new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
+                auto new_buffer = alloc.allocate(new_cap);
+                // transferring data up to idx to a new_buffer
+                for (size_type i = 0; i < idx; ++i) {
+                    alloc.construct(new_buffer + i, std::move(buffer_[i]));
+                    alloc.destruct(buffer_ + i);
+                }
+                alloc.construct(new_buffer + idx, std::move(val));
+                // data transfer after idx
+                for (size_type i = size_; i != idx; --i) {
+                    alloc.construct(new_buffer + i, std::move(buffer_[i - 1]));
+                    alloc.destruct(buffer_ + i - 1);
+                }
+                capacity_ = new_cap;
+                buffer_ = new_buffer;
+            } else {
+                alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
+                // can be assigned because the memory is the same
+                for (size_type i = size_ - 1; i != idx; --i) {
+                    buffer_[i] = std::move(buffer_[i - 1]);
+                }
+                buffer_[idx] = std::move(val);
+            }
+            ++size_;
+            return buffer_ + idx;
+        }
+
+        constexpr iterator insert(const_iterator pos, const value_type &val) {
+            auto idx = std::distance(buffer_, pos);
+            if (size_ == capacity_) {
+                auto new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
+                auto new_buffer = alloc.allocate(new_cap);
+                // transferring data up to idx to a new_buffer
+                for (size_type i = 0; i < idx; ++i) {
+                    alloc.construct(new_buffer + i, std::move(buffer_[i]));
+                    alloc.destruct(buffer_ + i);
+                }
+                alloc.construct(new_buffer + idx, val);
+                // data transfer after idx
+                for (size_type i = size_; i != idx; --i) {
+                    alloc.construct(new_buffer + i, std::move(buffer_[i - 1]));
+                    alloc.destruct(buffer_ + i - 1);
+                }
+                capacity_ = new_cap;
+                buffer_ = new_buffer;
+            } else {
+                alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
+                // can be assigned because the memory is the same
+                for (size_type i = size_ - 1; i != idx; --i) {
+                    buffer_[i] = std::move(buffer_[i - 1]);
+                }
+                buffer_[idx] = val;
+            }
+            ++size_;
+            return buffer_ + idx;
+        }
+
         constexpr void push_back(const value_type &val) {
             push_back(val);
         }
@@ -231,7 +292,7 @@ namespace naive {
 
     private:
         template<class ... Args>
-        void push_back_impl(Args && ... args) {
+        constexpr void push_back_impl(Args &&... args) {
             if (size_ == capacity_) {
                 reserve(capacity_ == 0 ? 1 : capacity_ * 2);
             }
@@ -240,7 +301,7 @@ namespace naive {
         }
 
         template<class ... Args>
-        pointer call_alloc_and_construct(size_type n_obj, Args &&... args) {
+        constexpr pointer call_alloc_and_construct(size_type n_obj, Args &&... args) {
             auto ptr = alloc.allocate(n_obj);
             for (size_type i = 0; i < n_obj; ++i) {
                 alloc.construct(ptr + i, std::forward<Args>(args)...);
@@ -248,7 +309,7 @@ namespace naive {
             return ptr;
         }
 
-        void call_destruct_and_dealloc(pointer ptr, size_type n_obj) {
+        constexpr void call_destruct_and_dealloc(pointer ptr, size_type n_obj) {
             for (size_type i = 0; i < n_obj; ++i) {
                 alloc.destruct(ptr + i);
             }

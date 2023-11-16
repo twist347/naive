@@ -19,8 +19,7 @@ namespace naive {
         }
 
         constexpr void deallocate(pointer ptr, size_type size) {
-            if (size == 0) operator delete(ptr);
-            else operator delete[](ptr);
+            operator delete(ptr);
         }
 
         template<class ... Args>
