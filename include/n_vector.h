@@ -3,6 +3,7 @@
 #include <n_utils.h>
 #include <n_allocator.h>
 #include <algorithm>
+#include <stdexcept>
 
 namespace naive {
 
@@ -223,6 +224,7 @@ namespace naive {
 
         constexpr iterator insert(const_iterator pos, const value_type &val) {
             auto idx = std::distance(buffer_, pos);
+            idx--;
             if (size_ == capacity_) {
                 auto new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
                 auto new_buffer = alloc.allocate(new_cap);

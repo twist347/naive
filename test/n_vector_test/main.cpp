@@ -5,9 +5,12 @@
 #include <log_struct.h>
 
 template<class T>
-void print(T t) {
-    for (auto i: t) {
-        std::cout << i << ' ';
+void print(const T &t) {
+    std::cout << "size: " << t.size() << ", cap: " << t.capacity() << '\n';
+    if constexpr (std::is_fundamental_v<typename T::value_type>) {
+        for (auto &&i: t) {
+            std::cout << i << ' ';
+        }
     }
     std::cout << '\n';
 }
@@ -103,7 +106,7 @@ TEST(TestNaiveVector, SubscriptOperatorTest) {
     ASSERT_EQ(v[2], val);
 }
 
-TEST(TestNaiveArray, DataMethodTest) {
+TEST(TestNaiveVector, DataMethodTest) {
     naive::vector<int> v{1, 2, 3};
     const naive::vector<int> cv{1, 2, 3, 4, 5};
     auto d = v.data();
@@ -115,6 +118,23 @@ TEST(TestNaiveArray, DataMethodTest) {
     ASSERT_EQ(v[2], val);
     ASSERT_EQ(*(d + 2), val);
 }
+
+TEST(A, B) {
+    std::vector<std::string> v {"a", "b", "c"};
+    v.reserve(4);
+//    print(v);
+    std::cout << v.size() << ' ' << v.capacity() << '\n';
+//    std::cout << v << '\n';
+    v.insert(v.begin() + 4, "hello");
+//    std::cout << v << '\n';
+    std::cout << v.size() << ' ' << v.capacity() << '\n';
+//    print(v);
+}
+
+//TEST(X, Y) {
+//    int arr[3];
+//    std::cout << arr[10];
+//}
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

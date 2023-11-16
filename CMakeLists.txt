@@ -10,3 +10,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined,leak -fno-s
 add_subdirectory(test/n_array_test)
 add_subdirectory(test/n_real_test)
 add_subdirectory(test/n_vector_test)
+add_subdirectory(test/n_sort_test)
+add_subdirectory(test/n_search_test)
