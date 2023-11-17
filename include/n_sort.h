@@ -19,9 +19,9 @@ namespace naive {
 
     template<class Iter, class Comparator = std::less<typename std::iterator_traits<Iter>::value_type>>
     constexpr void selection_sort(Iter first, Iter last, Comparator cmp = {}) {
-        for (auto it_i = first, end_it = std::prev(last); it_i != end_it; ++it_i) {
+        for (auto it_i = first, end_it = std::prev(last); it_i != end_it; std::advance(it_i, 1)) {
             auto min_el_it = it_i;
-            for (auto it_j = std::next(it_i); it_j != last; ++it_j) {
+            for (auto it_j = std::next(it_i); it_j != last; std::advance(it_j, 1)) {
                 if (cmp(*it_j, *min_el_it)) {
                     min_el_it = it_j;
                 }

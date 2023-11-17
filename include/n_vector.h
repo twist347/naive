@@ -191,6 +191,18 @@ namespace naive {
             size_ = 0;
         }
 
+        constexpr iterator erase(const_iterator pos) {
+            auto idx = std::distance(buffer_, pos);
+            for (size_type i = idx; i < size_ - 1; ++i) {
+                buffer_[i] = std::move(buffer_[i + 1]);
+            }
+            alloc.destruct(buffer_ + size_ - 1);
+            --size_;
+            return buffer_ + idx;
+        }
+
+        // TODO erase(first, last)
+
         constexpr iterator insert(const_iterator pos, value_type &&val) {
             auto idx = std::distance(buffer_, pos);
             idx--;

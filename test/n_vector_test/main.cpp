@@ -131,10 +131,12 @@ TEST(A, B) {
 //    print(v);
 }
 
-//TEST(X, Y) {
-//    int arr[3];
-//    std::cout << arr[10];
-//}
+TEST(X, Y) {
+    std::vector<Log> v(3);
+    print(v);
+    v.erase(v.begin());
+    print(v);
+}
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
