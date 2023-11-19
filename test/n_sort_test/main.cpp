@@ -1,6 +1,5 @@
 #include <n_sort.h>
 #include <n_vector.h>
-#include <iostream>
 #include <gtest/gtest.h>
 #include <random>
 
@@ -15,7 +14,7 @@ constexpr void fill_rnd_nums(Iter first, Iter last, Value min, Value max) {
 }
 
 TEST(TestNaiveSort, BubbleSort) {
-    auto n = 1000;
+    auto n = 10000;
     naive::vector<int> v(n);
     fill_rnd_nums(v.begin(), v.end(), -1000, 1000);
     naive::bubble_sort(v.begin(), v.end());
@@ -23,10 +22,26 @@ TEST(TestNaiveSort, BubbleSort) {
 }
 
 TEST(TestNaiveSort, SelectionSort) {
-    auto n = 1000;
+    auto n = 10000;
     naive::vector<int> v(n);
     fill_rnd_nums(v.begin(), v.end(), -1000, 1000);
     naive::selection_sort(v.begin(), v.end());
+    ASSERT_TRUE(std::is_sorted(v.begin(), v.end()));
+}
+
+TEST(TestNaiveSort, InsertionSort) {
+    auto n = 10000;
+    naive::vector<int> v(n);
+    fill_rnd_nums(v.begin(), v.end(), -1000, 1000);
+    naive::insertion_sort(v.begin(), v.end());
+    ASSERT_TRUE(std::is_sorted(v.begin(), v.end()));
+}
+
+TEST(TestNaiveSort, CountingSort) {
+    auto n = 10000;
+    naive::vector<int> v(n);
+    fill_rnd_nums(v.begin(), v.end(), -1000, 1000);
+    naive::counting_sort(v.begin(), v.end());
     ASSERT_TRUE(std::is_sorted(v.begin(), v.end()));
 }
 

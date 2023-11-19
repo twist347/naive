@@ -31,4 +31,38 @@ namespace naive {
             }
         }
     }
+
+    template<class Iter, class Comparator = std::less<typename std::iterator_traits<Iter>::value_type>>
+    constexpr void insertion_sort(Iter first, Iter last, Comparator cmp = {}) {
+        for (auto it_i = std::next(first); it_i != last; std::advance(it_i, 1)) {
+            auto key = *it_i;
+            auto it_j = std::prev(it_i);
+            while (it_j >= first && cmp(key, *it_j)) {
+                *(std::next(it_j)) = *it_j;
+                std::advance(it_j, -1);
+            }
+            *(std::next(it_j)) = key;
+        }
+    }
+
+    template<class Iter>
+    constexpr void counting_sort(Iter first, Iter last) {
+        auto max_el = *std::max_element(first, last);
+        auto min_el = *std::min_element(first, last);
+
+        auto offset = (min_el < 0) ? -min_el : 0;
+
+        std::vector<size_t> count(max_el - min_el + 1 + offset, 0);
+        for (auto it = first; it != last; std::advance(it, 1)) {
+            ++count[*it + offset];
+        }
+        auto it = first;
+        for (size_t i = min_el + offset; i <= max_el + offset; ++i) {
+            while (count[i] != 0) {
+                *it = i - offset;
+                ++it;
+                --count[i];
+            }
+        }
+    }
 }
