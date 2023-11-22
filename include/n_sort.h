@@ -65,4 +65,24 @@ namespace naive {
             }
         }
     }
+
+    template<typename Iter, class Comparator = std::less<typename std::iterator_traits<Iter>::value_type>>
+    void quick_sort(Iter first, Iter last, Comparator cmp = {}) {
+        Iter f = first, l = std::prev(last);
+        auto p_val = *std::next(f, std::distance(f, l) / 2);
+
+        // partition
+        while (f <= l) {
+            while (cmp(*f, p_val)) ++f;
+            while (cmp(p_val, *l)) --l;
+            if (f <= l) {
+                std::iter_swap(f, l);
+                ++f;
+                --l;
+            }
+        };
+
+        if (first < l) quick_sort(first, std::next(l));
+        if (f < std::prev(last)) quick_sort(f, last);
+    }
 }

@@ -15,9 +15,9 @@ namespace naive {
         using reference = value_type &;
         using const_reference = const value_type &;
         using pointer = value_type *;
-        using const_pointer = const pointer;
-        using iterator = pointer;
-        using const_iterator = const pointer;
+        using const_pointer = const value_type *;
+        using iterator = value_type *;
+        using const_iterator = const value_type *;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = std::ptrdiff_t;
@@ -192,7 +192,7 @@ namespace naive {
         }
 
         constexpr iterator erase(const_iterator pos) {
-            auto idx = std::distance(buffer_, pos);
+            auto idx = std::distance(cbegin(), pos);
             for (size_type i = idx; i < size_ - 1; ++i) {
                 buffer_[i] = std::move(buffer_[i + 1]);
             }
@@ -204,8 +204,7 @@ namespace naive {
         // TODO erase(first, last)
 
         constexpr iterator insert(const_iterator pos, value_type &&val) {
-            auto idx = std::distance(buffer_, pos);
-            idx--;
+            auto idx = std::distance(cbegin(), pos);
             if (size_ == capacity_) {
                 auto new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
                 auto new_buffer = alloc.allocate(new_cap);
@@ -215,11 +214,13 @@ namespace naive {
                     alloc.destruct(buffer_ + i);
                 }
                 alloc.construct(new_buffer + idx, std::move(val));
+
                 // data transfer after idx
-                for (size_type i = size_; i != idx; --i) {
-                    alloc.construct(new_buffer + i, std::move(buffer_[i - 1]));
-                    alloc.destruct(buffer_ + i - 1);
+                for (size_type i = idx; i < size_; ++i) {
+                    alloc.construct(new_buffer + i + 1, std::move(buffer_[i]));
+                    alloc.destruct(buffer_ + i);
                 }
+                alloc.deallocate(buffer_, capacity_);
                 capacity_ = new_cap;
                 buffer_ = new_buffer;
             } else {
@@ -235,8 +236,7 @@ namespace naive {
         }
 
         constexpr iterator insert(const_iterator pos, const value_type &val) {
-            auto idx = std::distance(buffer_, pos);
-            idx--;
+            auto idx = std::distance(cbegin(), pos);
             if (size_ == capacity_) {
                 auto new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
                 auto new_buffer = alloc.allocate(new_cap);
@@ -247,10 +247,11 @@ namespace naive {
                 }
                 alloc.construct(new_buffer + idx, val);
                 // data transfer after idx
-                for (size_type i = size_; i != idx; --i) {
-                    alloc.construct(new_buffer + i, std::move(buffer_[i - 1]));
-                    alloc.destruct(buffer_ + i - 1);
+                for (size_type i = idx; i < size_; ++i) {
+                    alloc.construct(new_buffer + i + 1, std::move(buffer_[i]));
+                    alloc.destruct(buffer_ + i);
                 }
+                alloc.deallocate(buffer_, capacity_);
                 capacity_ = new_cap;
                 buffer_ = new_buffer;
             } else {
