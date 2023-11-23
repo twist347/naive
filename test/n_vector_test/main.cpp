@@ -1,59 +1,62 @@
 #include <gtest/gtest.h>
 #include <n_vector.h>
 #include <vector>
-#include <log_struct.h>
 #include <test_stuff/test_utils.h>
 
+// ctors and dtor
+
 TEST(TestNaiveVector, DefaultConstructorTest) {
-    naive::vector<int> v;
+    naive::vector<std::string> v;
     ASSERT_EQ(v.size(), 0);
     ASSERT_EQ(v.capacity(), 0);
 }
 
 TEST(TestNaiveVector, SizeConstructorTest) {
-    std::vector<int> v(3);
+    std::vector<std::string> v(3);
     ASSERT_EQ(v.size(), 3);
     ASSERT_EQ(v.capacity(), 3);
 }
 
 TEST(TestNaiveVector, SizeAndValConstructorTest) {
-    naive::vector<int> v(3, 5);
+    naive::vector<std::string> v(3, "hello");
     ASSERT_EQ(v.size(), 3);
     ASSERT_EQ(v.capacity(), 3);
-    for (auto val: v) {
-        ASSERT_EQ(val, 5);
+    for (const auto &val: v) {
+        ASSERT_EQ(val, "hello");
     }
 }
 
 TEST(TestNaiveVector, InitListConstructorTest) {
-    naive::vector<int> v{1, 2, 3};
+    naive::vector<std::string> v{"hello", "c++", "world"};
     ASSERT_EQ(v.size(), 3);
     ASSERT_EQ(v.capacity(), 3);
     auto i = 0;
-    for (auto val: v) {
-        ASSERT_EQ(val, ++i);
-    }
+    ASSERT_EQ(v[0], "hello");
+    ASSERT_EQ(v[1], "c++");
+    ASSERT_EQ(v[2], "world");
 }
 
 TEST(TestNaiveVector, CopyConstructorTest) {
-    naive::vector<int> v{1, 2, 3};
+    naive::vector<std::string> v{"hello", "c++", "world"};
     auto other = v;
     ASSERT_EQ(other.size(), v.size());
     ASSERT_EQ(other.capacity(), v.capacity());
-    for (size_t i = 0; i < other.size(); ++i) {
-        ASSERT_EQ(v[i], other[i]);
-    }
+    ASSERT_EQ(other[0], "hello");
+    ASSERT_EQ(other[1], "c++");
+    ASSERT_EQ(other[2], "world");
 }
 
 TEST(TestNaiveVector, CopyAssignmentTest) {
-    naive::vector<int> v{1, 2, 3};
-    naive::vector<int> other{1, 2, 3, 4, 5};
+    naive::vector<std::string> v{"hello", "c++", "world"};
+    naive::vector<std::string> other{"rust", "java", "python", "c#", "fortran"};
     v = other;
     ASSERT_EQ(v.size(), other.size());
     ASSERT_EQ(v.capacity(), other.capacity());
-    for (size_t i = 0; i < other.size(); ++i) {
-        ASSERT_EQ(v[i], other[i]);
-    }
+    ASSERT_EQ(v[0], "rust");
+    ASSERT_EQ(v[1], "java");
+    ASSERT_EQ(v[2], "python");
+    ASSERT_EQ(v[3], "c#");
+    ASSERT_EQ(v[4], "fortran");
 }
 
 TEST(TestNaiveVector, MoveConstructorTest) {
@@ -81,6 +84,8 @@ TEST(TestNaiveVector, MoveAssignmentTest) {
         ASSERT_EQ(other[i], i + 1);
     }
 }
+
+// access
 
 TEST(TestNaiveVector, SubscriptOperatorTest) {
     naive::vector<int> v{1, 2, 3};
@@ -137,6 +142,8 @@ TEST(TestNaiveVector, BacktMethodTest) {
     ASSERT_EQ(v.back(), val);
 }
 
+// iterators
+
 TEST(TestNaiveVector, IteratorsTest) {
     naive::vector<int> v{1, 2, 3, 4, 5};
     const naive::vector<int> cv{1, 2, 3};
@@ -184,6 +191,8 @@ TEST(TestNaiveVector, ConstReverseIteratorsTest) {
     }
 }
 
+// capacity
+
 TEST(TestNaiveVector, SizeandEmptyMethodsTest) {
     naive::vector<int> ev, v{1, 2, 3};
     ASSERT_EQ(ev.size(), 0);
@@ -193,8 +202,8 @@ TEST(TestNaiveVector, SizeandEmptyMethodsTest) {
     ASSERT_FALSE(v.empty());
 }
 
-TEST(TestNaiveVector, CapacityMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, CapacityMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     ASSERT_EQ(v.capacity(), 3);
     ASSERT_EQ(v.size(), 3);
     naive::vector<std::string> empty;
@@ -202,8 +211,8 @@ TEST(TestNaiveVector, CapacityMethodsTest) {
     ASSERT_EQ(empty.size(), 0);
 }
 
-TEST(TestNaiveVector, ReserveMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, ReserveMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.reserve(10);
     ASSERT_EQ(v.capacity(), 10);
     ASSERT_EQ(v.size(), 3);
@@ -213,8 +222,8 @@ TEST(TestNaiveVector, ReserveMethodsTest) {
     ASSERT_EQ(empty.size(), 0);
 }
 
-TEST(TestNaiveVector, ShrinkToFitMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, ShrinkToFitMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.reserve(10);
     ASSERT_EQ(v.capacity(), 10);
     ASSERT_EQ(v.size(), 3);
@@ -228,15 +237,15 @@ TEST(TestNaiveVector, ShrinkToFitMethodsTest) {
     ASSERT_EQ(empty.size(), 0);
 }
 
-TEST(TestNaiveVector, ClearMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, ClearMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.clear();
     ASSERT_EQ(v.size(), 0);
     ASSERT_EQ(v.capacity(), 3);
 }
 
-TEST(TestNaiveVector, EraseMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, EraseMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.erase(v.begin() + 1);
     ASSERT_EQ(v.size(), 2);
     ASSERT_EQ(v.capacity(), 3);
@@ -244,8 +253,8 @@ TEST(TestNaiveVector, EraseMethodsTest) {
     ASSERT_EQ(v[1], "world");
 }
 
-TEST(TestNaiveVector, InsertMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, InsertMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.insert(v.begin() + 1, "rust");
     print_vec(v);
     ASSERT_EQ(v.size(), 4);
@@ -256,8 +265,8 @@ TEST(TestNaiveVector, InsertMethodsTest) {
     ASSERT_EQ(v[3], "world");
 }
 
-TEST(TestNaiveVector, PushBackMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, PushBackMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.push_back("rust");
     ASSERT_EQ(v.size(), 4);
     ASSERT_EQ(v.capacity(), 6);
@@ -267,8 +276,8 @@ TEST(TestNaiveVector, PushBackMethodsTest) {
     ASSERT_EQ(v[3], "rust");
 }
 
-TEST(TestNaiveVector, EmplaceBackMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, EmplaceBackMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.emplace_back();
     ASSERT_EQ(v.size(), 4);
     ASSERT_EQ(v.capacity(), 6);
@@ -278,8 +287,8 @@ TEST(TestNaiveVector, EmplaceBackMethodsTest) {
     ASSERT_EQ(v[3], "");
 }
 
-TEST(TestNaiveVector, ResizeMethodsTest) {
-    naive::vector<std::string> v {"hello", "c++", "world"};
+TEST(TestNaiveVector, ResizeMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
     v.resize(5);
     ASSERT_EQ(v.size(), 5);
     ASSERT_EQ(v.capacity(), 5);
@@ -288,6 +297,30 @@ TEST(TestNaiveVector, ResizeMethodsTest) {
     ASSERT_EQ(v[2], "world");
     ASSERT_EQ(v[3], "");
     ASSERT_EQ(v[4], "");
+}
+
+TEST(TestNaiveVector, PopBackMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
+    v.pop_back();
+    ASSERT_EQ(v.size(), 2);
+    ASSERT_EQ(v.capacity(), 3);
+    ASSERT_EQ(v[0], "hello");
+    ASSERT_EQ(v[1], "c++");
+}
+
+TEST(TestNaiveVector, SwapMethodTest) {
+    naive::vector<std::string> v{"hello", "c++", "world"};
+    naive::vector<std::string> other{"java", "python"};
+    v.swap(other);
+    ASSERT_EQ(v.size(), 2);
+    ASSERT_EQ(v.capacity(), 2);
+    ASSERT_EQ(other.capacity(), 3);
+    ASSERT_EQ(other.capacity(), 3);
+    ASSERT_EQ(v[0], "java");
+    ASSERT_EQ(v[1], "python");
+    ASSERT_EQ(other[0], "hello");
+    ASSERT_EQ(other[1], "c++");
+    ASSERT_EQ(other[2], "world");
 }
 
 int main(int argc, char **argv) {

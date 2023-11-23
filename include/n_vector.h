@@ -22,6 +22,8 @@ namespace naive {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = std::ptrdiff_t;
 
+        // ctors and dtor
+
         constexpr vector() : size_(naive::utils::to<size_type>(0)),
                              capacity_(naive::utils::to<size_type>(0)),
                              buffer_(call_alloc_and_construct(naive::utils::to<size_type>(0))) {}
@@ -201,36 +203,29 @@ namespace naive {
             return buffer_ + idx;
         }
 
+        constexpr void pop_back() {
+            erase(std::prev(end()));
+        }
+
+        constexpr void swap(vector &other) noexcept {
+            std::swap(size_, other.size_);
+            std::swap(capacity_, other.capacity_);
+            std::swap(buffer_, other.buffer_);
+        }
+
         // TODO erase(first, last)
 
         constexpr iterator insert(const_iterator pos, value_type &&val) {
             auto idx = std::distance(cbegin(), pos);
             if (size_ == capacity_) {
-                auto new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
-                auto new_buffer = alloc.allocate(new_cap);
-                // transferring data up to idx to a new_buffer
-                for (size_type i = 0; i < idx; ++i) {
-                    alloc.construct(new_buffer + i, std::move(buffer_[i]));
-                    alloc.destruct(buffer_ + i);
-                }
-                alloc.construct(new_buffer + idx, std::move(val));
-
-                // data transfer after idx
-                for (size_type i = idx; i < size_; ++i) {
-                    alloc.construct(new_buffer + i + 1, std::move(buffer_[i]));
-                    alloc.destruct(buffer_ + i);
-                }
-                alloc.deallocate(buffer_, capacity_);
-                capacity_ = new_cap;
-                buffer_ = new_buffer;
-            } else {
-                alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
-                // can be assigned because the memory is the same
-                for (size_type i = size_ - 1; i != idx; --i) {
-                    buffer_[i] = std::move(buffer_[i - 1]);
-                }
-                buffer_[idx] = std::move(val);
+                reserve(capacity_ * 2);
             }
+            alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
+            // can be assigned because the memory is the same
+            for (size_type i = size_ - 1; i != idx; --i) {
+                buffer_[i] = std::move(buffer_[i - 1]);
+            }
+            buffer_[idx] = std::move(val);
             ++size_;
             return buffer_ + idx;
         }
@@ -238,30 +233,14 @@ namespace naive {
         constexpr iterator insert(const_iterator pos, const value_type &val) {
             auto idx = std::distance(cbegin(), pos);
             if (size_ == capacity_) {
-                auto new_cap = capacity_ == 0 ? 1 : capacity_ * 2;
-                auto new_buffer = alloc.allocate(new_cap);
-                // transferring data up to idx to a new_buffer
-                for (size_type i = 0; i < idx; ++i) {
-                    alloc.construct(new_buffer + i, std::move(buffer_[i]));
-                    alloc.destruct(buffer_ + i);
-                }
-                alloc.construct(new_buffer + idx, val);
-                // data transfer after idx
-                for (size_type i = idx; i < size_; ++i) {
-                    alloc.construct(new_buffer + i + 1, std::move(buffer_[i]));
-                    alloc.destruct(buffer_ + i);
-                }
-                alloc.deallocate(buffer_, capacity_);
-                capacity_ = new_cap;
-                buffer_ = new_buffer;
-            } else {
-                alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
-                // can be assigned because the memory is the same
-                for (size_type i = size_ - 1; i != idx; --i) {
-                    buffer_[i] = std::move(buffer_[i - 1]);
-                }
-                buffer_[idx] = val;
+                reserve(capacity_ * 2);
             }
+            alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
+            // can be assigned because the memory is the same
+            for (size_type i = size_ - 1; i != idx; --i) {
+                buffer_[i] = std::move(buffer_[i - 1]);
+            }
+            buffer_[idx] = val;
             ++size_;
             return buffer_ + idx;
         }
