@@ -203,6 +203,11 @@ TEST(TestNaiveVector, SizeandEmptyMethodsTest) {
     ASSERT_FALSE(v.empty());
 }
 
+TEST(TestNaiveVector, MaxSizeMethodTest) {
+    naive::vector<int> v{1, 2, 3};
+    ASSERT_EQ(v.max_size(), std::numeric_limits<std::size_t>::max());
+}
+
 TEST(TestNaiveVector, CapacityMethodTest) {
     naive::vector<std::string> v{"hello", "c++", "world"};
     ASSERT_EQ(v.capacity(), 3);

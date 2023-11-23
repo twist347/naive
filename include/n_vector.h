@@ -156,6 +156,8 @@ namespace naive {
 
         constexpr bool empty() const noexcept { return size() == naive::utils::to<size_type>(0); }
 
+        constexpr size_type max_size() const noexcept { return std::numeric_limits<size_type>::max(); }
+
         constexpr void reserve(size_type new_cap) {
             if (new_cap <= capacity_) {
                 return;
@@ -279,11 +281,15 @@ namespace naive {
 
         template<class U>
         constexpr iterator insert_impl(const_iterator pos, U &&u) {
-            // WRONG
             auto idx_pos = std::distance(cbegin(), pos);
             if (size_ == capacity_) {
                 // unnecessary actions. need to correct
                 reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+            }
+            if (size_ == 0) {
+                alloc.construct(buffer_, std::forward<U>(u));
+                ++size_;
+                return buffer_;
             }
             alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
             // can be assigned because the memory is the same
