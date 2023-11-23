@@ -215,43 +215,26 @@ namespace naive {
 
         // TODO erase(first, last)
 
-        constexpr iterator insert(const_iterator pos, value_type &&val) {
-            auto idx = std::distance(cbegin(), pos);
-            if (size_ == capacity_) {
-                reserve(capacity_ * 2);
-            }
-            alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
-            // can be assigned because the memory is the same
-            for (size_type i = size_ - 1; i != idx; --i) {
-                buffer_[i] = std::move(buffer_[i - 1]);
-            }
-            buffer_[idx] = std::move(val);
-            ++size_;
-            return buffer_ + idx;
+        constexpr iterator insert(const_iterator pos, const value_type &val) {
+            return insert_impl(pos, val);
         }
 
-        constexpr iterator insert(const_iterator pos, const value_type &val) {
-            auto idx = std::distance(cbegin(), pos);
-            if (size_ == capacity_) {
-                reserve(capacity_ * 2);
-            }
-            alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
-            // can be assigned because the memory is the same
-            for (size_type i = size_ - 1; i != idx; --i) {
-                buffer_[i] = std::move(buffer_[i - 1]);
-            }
-            buffer_[idx] = val;
-            ++size_;
-            return buffer_ + idx;
+        constexpr iterator insert(const_iterator pos, value_type &&val) {
+            return insert_impl(pos, std::forward<value_type>(val));
+        }
+
+        template<class ... Args>
+        constexpr iterator emplace(const_iterator pos, Args &&... args) {
+            value_type obj(std::forward<Args>(args)...);
+            return insert_impl(pos, std::move(obj));
         }
 
         constexpr void push_back(const value_type &val) {
-            push_back(val);
+            push_back_impl(val);
         }
 
-        template<class U>
-        constexpr void push_back(U &&val) {
-            push_back_impl(std::forward<U>(val));
+        constexpr void push_back(value_type &&val) {
+            push_back_impl(std::forward<value_type>(val));
         }
 
         template<class ... Args>
@@ -292,6 +275,24 @@ namespace naive {
             }
             alloc.construct(buffer_ + size_, std::forward<Args>(args)...);
             ++size_;
+        }
+
+        template<class U>
+        constexpr iterator insert_impl(const_iterator pos, U &&u) {
+            // WRONG
+            auto idx_pos = std::distance(cbegin(), pos);
+            if (size_ == capacity_) {
+                // unnecessary actions. need to correct
+                reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+            }
+            alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
+            // can be assigned because the memory is the same
+            for (size_type i = size_ - 1; i != idx_pos; --i) {
+                buffer_[i] = std::move(buffer_[i - 1]);
+            }
+            buffer_[idx_pos] = std::forward<U>(u);
+            ++size_;
+            return buffer_ + idx_pos;
         }
 
         template<class ... Args>

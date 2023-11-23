@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <n_vector.h>
 #include <vector>
+#include <log_struct.h>
 #include <test_stuff/test_utils.h>
 
 // ctors and dtor
