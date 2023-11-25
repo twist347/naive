@@ -4,12 +4,12 @@
 #include <log_struct.h>
 
 TEST(TestUniquePtr, TraitsAndSize) {
-    using t = naive::unique_ptr<int>;
+    using t = const naive::unique_ptr<int> &;
     using t_arr = naive::unique_ptr<int[]>;
     static_assert(sizeof(t) == sizeof(int *));
     static_assert(sizeof(t_arr) == sizeof(int *));
-    static_assert(std::is_same_v<t::element_type, int>);
-    static_assert(std::is_same_v<t::pointer, int *>);
+    static_assert(std::is_same_v<std::remove_cvref_t<t>::element_type, int>);
+    static_assert(std::is_same_v<std::remove_cvref_t<t>::pointer, int *>);
     ASSERT_TRUE(1);
 }
 
@@ -169,7 +169,6 @@ TEST(TestUniquePtr, OperatorBool) {
 TEST(TestUniquePtr, ThreeWayComparisonOperator) {
     naive::unique_ptr<int[]> up(new int[3]{1, 2, 3});
 }
-
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

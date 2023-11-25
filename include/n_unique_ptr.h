@@ -119,7 +119,7 @@ namespace naive {
 
     template<class T, class D>
     constexpr bool operator<(const unique_ptr<T, D> &lhs, const unique_ptr<T, D> &rhs) {
-        return std::less<T>(lhs.get(), rhs.get());
+        return std::less<typename std::remove_cvref_t<decltype(lhs)>::pointer>{}(lhs.get(), rhs.get());
     }
 
     template<class T, class D>
