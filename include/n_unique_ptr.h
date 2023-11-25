@@ -217,4 +217,17 @@ namespace naive {
     private:
         pointer ptr_;
     };
+
+
+    template<class T, class ...Args>
+    requires(!std::is_array_v<T>)
+    auto make_unique(Args &&...args) {
+        return naive::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+
+    template<class T>
+    requires(std::is_array_v<T>)
+    auto make_unique(std::size_t n) {
+        return naive::unique_ptr<T>(new std::remove_extent_t<T>[n]);
+    }
 }

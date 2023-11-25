@@ -170,6 +170,17 @@ TEST(TestUniquePtr, ThreeWayComparisonOperator) {
     naive::unique_ptr<int[]> up(new int[3]{1, 2, 3});
 }
 
+TEST(TestUniquePtr, MakeUniqueFunction) {
+    auto up = naive::make_unique<int>(3);
+    ASSERT_EQ(*up, 3);
+}
+
+TEST(TestUniquePtr, MakeUniqueFunctionArray) {
+    auto up = naive::make_unique<int[]>(3);
+    for (int i = 0; i < 3; ++i) up[i] = i + 1;
+    for (int i = 0; i < 3; ++i) ASSERT_EQ(up[i], i + 1);
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
