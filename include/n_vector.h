@@ -94,7 +94,7 @@ namespace naive {
 
         constexpr reference operator[](size_type idx) { return buffer_[idx]; }
 
-        constexpr const_reference operator[](size_type idx) const noexcept { return buffer_[idx]; }
+        constexpr const_reference operator[](size_type idx) const { return buffer_[idx]; }
 
         constexpr pointer data() { return static_cast<pointer>(buffer_); }
 

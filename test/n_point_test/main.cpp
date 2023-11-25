@@ -9,6 +9,13 @@ TEST(A, B) {
     ASSERT_EQ(p3[1], 4.0);
 }
 
+TEST(A, C) {
+    naive::point<2> x{1.0, 2.0};
+    naive::point<2> y{1.0, 2.0};
+    auto res = x * y;
+    std::cout << res << '\n';
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
