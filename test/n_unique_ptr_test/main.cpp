@@ -3,13 +3,15 @@
 #include <memory>
 #include <log_struct.h>
 
-TEST(TestUniquePtr, TraitsAndSize) {
-    using t = const naive::unique_ptr<int> &;
+TEST(TestUniquePtr, TraitsAndSizeOf) {
+    using t = naive::unique_ptr<int>;
     using t_arr = naive::unique_ptr<int[]>;
     static_assert(sizeof(t) == sizeof(int *));
     static_assert(sizeof(t_arr) == sizeof(int *));
     static_assert(std::is_same_v<std::remove_cvref_t<t>::element_type, int>);
     static_assert(std::is_same_v<std::remove_cvref_t<t>::pointer, int *>);
+    static_assert(std::is_same_v<t_arr::element_type, int>);
+    static_assert(std::is_same_v<std::remove_cvref_t<t_arr>::pointer, int *>);
     ASSERT_TRUE(1);
 }
 
@@ -66,11 +68,13 @@ TEST(TestUniquePtr, MoveSemanticsArray) {
     ASSERT_EQ(m_up[1], 10);
 }
 
-TEST(TestUniquePtr, DereferenceOperator) {
+TEST(TestUniquePtr, DereferencesOperator) {
     struct S {
         int foo() { return 42; }
 
         std::string bar() { return "hello"; }
+
+        int x = 5;
     };
 
     naive::unique_ptr<int> up(new int{5});
@@ -78,6 +82,7 @@ TEST(TestUniquePtr, DereferenceOperator) {
     naive::unique_ptr<S> up_s(new S);
     ASSERT_EQ(up_s->foo(), 42);
     ASSERT_EQ(up_s->bar(), "hello");
+    ASSERT_EQ((*up_s).x, 5);
 }
 
 TEST(TestUniquePtr, SubscriptOperator) {

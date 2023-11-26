@@ -262,7 +262,6 @@ TEST(TestNaiveVector, EraseMethodTest) {
 TEST(TestNaiveVector, InsertMethodTest) {
     naive::vector<std::string> v{"hello", "c++", "world"};
     v.insert(v.begin() + 1, "rust");
-    print_vec(v);
     ASSERT_EQ(v.size(), 4);
     ASSERT_EQ(v.capacity(), 6);
     ASSERT_EQ(v[0], "hello");

@@ -26,30 +26,30 @@ namespace naive {
 
         constexpr vector() : size_(naive::utils::to<size_type>(0)),
                              capacity_(naive::utils::to<size_type>(0)),
-                             buffer_(call_alloc_and_construct(naive::utils::to<size_type>(0))) {}
+                             buffer_(alloc_and_construct(naive::utils::to<size_type>(0))) {}
 
         constexpr explicit vector(size_type size) :
-                size_(size), capacity_(size_), buffer_(call_alloc_and_construct(size_)) {}
+                size_(size), capacity_(size_), buffer_(alloc_and_construct(size_)) {}
 
         constexpr vector(size_type size, const value_type &val) :
-                size_(size), capacity_(size_), buffer_(alloc.allocate(size_)) {
+                size_(size), capacity_(size_), buffer_(alloc_.allocate(size_)) {
             for (size_type i = 0; i < size_; ++i) {
-                alloc.construct(buffer_ + i, val);
+                alloc_.construct(buffer_ + i, val);
             }
         }
 
         constexpr vector(std::initializer_list<value_type> il) :
-                size_(il.size()), capacity_(il.size()), buffer_(alloc.allocate(size_)) {
+                size_(il.size()), capacity_(il.size()), buffer_(alloc_.allocate(size_)) {
             auto it = il.begin();
             for (size_type i = 0; i < size_; ++i) {
-                alloc.construct(buffer_ + i, *(it++));
+                alloc_.construct(buffer_ + i, *(it++));
             }
         }
 
         constexpr vector(const vector &other) : size_(other.size_), capacity_(other.capacity_) {
-            auto new_buffer = alloc.allocate(capacity_);
+            auto new_buffer = alloc_.allocate(capacity_);
             for (size_type i = 0; i < size_; ++i) {
-                alloc.construct(new_buffer + i, other.buffer_[i]);
+                alloc_.construct(new_buffer + i, other.buffer_[i]);
             }
             buffer_ = new_buffer;
         }
@@ -71,7 +71,7 @@ namespace naive {
 
         constexpr vector &operator=(vector &&other) noexcept {
             if (this == &other) return *this;
-            call_destruct_and_dealloc(buffer_, capacity_);
+            destruct_and_dealloc(buffer_, capacity_);
             std::swap(size_, other.size_);
             std::swap(capacity_, other.capacity_);
             std::swap(buffer_, other.buffer_);
@@ -85,9 +85,9 @@ namespace naive {
 
         constexpr ~vector() {
             for (size_t i = 0; i < size_; ++i) {
-                alloc.destruct(buffer_ + i);
+                alloc_.destruct(buffer_ + i);
             }
-            alloc.deallocate(buffer_, capacity_);
+            alloc_.deallocate(buffer_, capacity_);
         }
 
         // access
@@ -162,12 +162,12 @@ namespace naive {
             if (new_cap <= capacity_) {
                 return;
             }
-            auto new_buffer = alloc.allocate(new_cap);
+            auto new_buffer = alloc_.allocate(new_cap);
             for (size_type i = 0; i < size_; ++i) {
-                alloc.construct(new_buffer + i, std::move(buffer_[i]));
-                alloc.destruct(buffer_ + i);
+                alloc_.construct(new_buffer + i, std::move(buffer_[i]));
+                alloc_.destruct(buffer_ + i);
             }
-            alloc.deallocate(buffer_, size_);
+            alloc_.deallocate(buffer_, size_);
             capacity_ = new_cap;
             buffer_ = new_buffer;
         }
@@ -176,12 +176,12 @@ namespace naive {
             if (capacity_ == size_) {
                 return;
             }
-            auto new_buffer = alloc.allocate(size_);
+            auto new_buffer = alloc_.allocate(size_);
             for (size_type i = 0; i < size_; ++i) {
-                alloc.construct(new_buffer + i, std::move(buffer_[i]));
-                alloc.destruct(buffer_ + i);
+                alloc_.construct(new_buffer + i, std::move(buffer_[i]));
+                alloc_.destruct(buffer_ + i);
             }
-            alloc.deallocate(buffer_, capacity_);
+            alloc_.deallocate(buffer_, capacity_);
             buffer_ = new_buffer;
             capacity_ = size_;
         }
@@ -190,7 +190,7 @@ namespace naive {
 
         constexpr void clear() noexcept {
             for (size_type i = 0; i < size_; ++i) {
-                alloc.destruct(buffer_ + i);
+                alloc_.destruct(buffer_ + i);
             }
             size_ = 0;
         }
@@ -200,7 +200,7 @@ namespace naive {
             for (size_type i = idx; i < size_ - 1; ++i) {
                 buffer_[i] = std::move(buffer_[i + 1]);
             }
-            alloc.destruct(buffer_ + size_ - 1);
+            alloc_.destruct(buffer_ + size_ - 1);
             --size_;
             return buffer_ + idx;
         }
@@ -249,21 +249,21 @@ namespace naive {
             if (size_ == new_size) {
                 return;
             } else if (new_size > size_) {
-                auto new_buffer = alloc.allocate(new_size);
+                auto new_buffer = alloc_.allocate(new_size);
                 for (size_type i = 0; i < size_; ++i) {
-                    alloc.construct(new_buffer + i, std::move(buffer_[i]));
-                    alloc.destruct(buffer_ + i);
+                    alloc_.construct(new_buffer + i, std::move(buffer_[i]));
+                    alloc_.destruct(buffer_ + i);
                 }
                 for (size_type i = size_; i < new_size; ++i) {
-                    alloc.construct(new_buffer + i);
+                    alloc_.construct(new_buffer + i);
                 }
-                alloc.deallocate(buffer_, capacity_);
+                alloc_.deallocate(buffer_, capacity_);
                 size_ = new_size;
                 capacity_ = new_size;
                 buffer_ = new_buffer;
             } else {
                 for (size_type i = new_size; i < size_; ++i) {
-                    alloc.destruct(buffer_ + i);
+                    alloc_.destruct(buffer_ + i);
                 }
                 size_ = new_size;
             }
@@ -275,7 +275,7 @@ namespace naive {
             if (size_ == capacity_) {
                 reserve(capacity_ == 0 ? 1 : capacity_ * 2);
             }
-            alloc.construct(buffer_ + size_, std::forward<Args>(args)...);
+            alloc_.construct(buffer_ + size_, std::forward<Args>(args)...);
             ++size_;
         }
 
@@ -287,11 +287,11 @@ namespace naive {
                 reserve(capacity_ == 0 ? 1 : capacity_ * 2);
             }
             if (size_ == 0) {
-                alloc.construct(buffer_, std::forward<U>(u));
+                alloc_.construct(buffer_, std::forward<U>(u));
                 ++size_;
                 return buffer_;
             }
-            alloc.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
+            alloc_.construct(buffer_ + size_, std::move(buffer_[size_ - 1]));
             // can be assigned because the memory is the same
             for (size_type i = size_ - 1; i != idx_pos; --i) {
                 buffer_[i] = std::move(buffer_[i - 1]);
@@ -301,26 +301,28 @@ namespace naive {
             return buffer_ + idx_pos;
         }
 
+        Alloc alloc_;
+        size_type size_;
+        size_type capacity_;
+        pointer buffer_;
+
+        using alloc_ptr = decltype(alloc_)::pointer;
+
         template<class ... Args>
-        constexpr pointer call_alloc_and_construct(size_type n_obj, Args &&... args) {
-            auto ptr = alloc.allocate(n_obj);
+        constexpr auto alloc_and_construct(size_type n_obj, Args &&... args) -> alloc_ptr {
+            auto ptr = alloc_.allocate(n_obj);
             for (size_type i = 0; i < n_obj; ++i) {
-                alloc.construct(ptr + i, std::forward<Args>(args)...);
+                alloc_.construct(ptr + i, std::forward<Args>(args)...);
             }
             return ptr;
         }
 
-        constexpr void call_destruct_and_dealloc(pointer ptr, size_type n_obj) {
+        constexpr void destruct_and_dealloc(alloc_ptr ptr, size_type n_obj) {
             for (size_type i = 0; i < n_obj; ++i) {
-                alloc.destruct(ptr + i);
+                alloc_.destruct(ptr + i);
             }
-            alloc.deallocate(ptr, n_obj);
+            alloc_.deallocate(ptr, n_obj);
         }
-
-        Alloc alloc;
-        size_type size_;
-        size_type capacity_;
-        pointer buffer_;
     };
 
     // print

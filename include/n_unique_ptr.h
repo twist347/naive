@@ -1,24 +1,9 @@
 #pragma once
 
+#include <utility>
+#include <n_deleter.h>
+
 namespace naive {
-
-    template<class T>
-    struct default_delete {
-        constexpr default_delete() noexcept = default;
-
-        constexpr void operator()(T *ptr) const noexcept {
-            delete ptr;
-        }
-    };
-
-    template<class T>
-    struct default_delete<T[]> {
-        constexpr default_delete() noexcept = default;
-
-        constexpr void operator()(T *ptr) const noexcept {
-            delete[] ptr;
-        }
-    };
 
     template<class T, class Deleter = naive::default_delete<T>>
     class unique_ptr : private Deleter {
@@ -87,7 +72,7 @@ namespace naive {
 
         // observers
 
-        constexpr pointer get() const noexcept {
+        constexpr T *get() const noexcept {
             return ptr_;
         }
 
@@ -198,7 +183,7 @@ namespace naive {
 
         // observers
 
-        constexpr pointer get() const noexcept {
+        constexpr T *get() const noexcept {
             return ptr_;
         }
 
@@ -221,13 +206,15 @@ namespace naive {
 
     template<class T, class ...Args>
     requires(!std::is_array_v<T>)
-    auto make_unique(Args &&...args) {
+    constexpr auto make_unique(Args &&...args) {
         return naive::unique_ptr<T>(new T(std::forward<Args>(args)...));
     }
 
     template<class T>
     requires(std::is_array_v<T>)
-    auto make_unique(std::size_t n) {
+    constexpr auto make_unique(std::size_t n) {
         return naive::unique_ptr<T>(new std::remove_extent_t<T>[n]);
     }
+
+    // TODO: make_unique_for_overwrite
 }
