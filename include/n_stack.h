@@ -15,11 +15,11 @@ namespace naive {
         using reference = Container::reference;
         using const_reference = Container::const_reference;
 
-        stack() : container_() {}
+        constexpr stack() : container_() {}
 
-        explicit stack(const Container &container) : container_(container) {}
+        explicit constexpr stack(const Container &container) : container_(container) {}
 
-        explicit stack(Container &&container) : container_(std::move(container)) {}
+        explicit constexpr stack(Container &&container) : container_(std::move(container)) {}
 
 
         // element access

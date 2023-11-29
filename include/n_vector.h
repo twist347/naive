@@ -7,7 +7,7 @@
 
 namespace naive {
 
-    template<class T, class Alloc = naive::allocator<T>>
+    template<class T, class Allocator = naive::allocator<T>>
     class vector {
     public:
         using value_type = T;
@@ -301,7 +301,7 @@ namespace naive {
             return buffer_ + idx_pos;
         }
 
-        Alloc alloc_;
+        Allocator alloc_;
         size_type size_;
         size_type capacity_;
         pointer buffer_;
