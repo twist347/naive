@@ -25,7 +25,7 @@ TEST(TestNaiveArray, DefaultConstructorTest) {
 
 TEST(TestNaiveArray, SizeConstructorTest) {
     naive::array<int> arr(3);
-    ASSERT_EQ(arr.size(), 0);
+    ASSERT_EQ(arr.size(), 3);
 }
 
 TEST(TestNaiveArray, SizeAndValConstructorTest) {
