@@ -40,8 +40,6 @@ namespace naive {
         }
 
         constexpr array &operator=(const array &other) {
-//            auto copy = other;
-//            std::swap(*this, copy);
             if (this == &other) {
                 return *this;
             }
@@ -60,20 +58,18 @@ namespace naive {
         }
 
         constexpr array &operator=(array &&other) noexcept {
-            if (this == &other) return *this;
+            if (this == &other) {
+                return *this;
+            }
             destruct(buffer_);
 
-            std::swap(size_, other.size_);
-            std::swap(buffer_, other.buffer_);
-
-            other.size_ = naive::utils::to<size_type>(0);
-            other.buffer_ = nullptr;
+            buffer_ = std::exchange(other.buffer_, nullptr);
+            size_ = std::exchange(other.size_, naive::utils::to<size_type>(0));
 
             return *this;
         }
 
         constexpr ~array() {
-            size_ = naive::utils::to<size_type>(0);
             destruct(buffer_);
         }
 
