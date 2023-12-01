@@ -40,6 +40,8 @@ namespace naive {
         }
 
         constexpr array &operator=(const array &other) {
+//            auto copy = other;
+//            std::swap(*this, copy);
             if (this == &other) {
                 return *this;
             }
@@ -145,7 +147,7 @@ namespace naive {
 
         constexpr void swap(array &other) {
             std::swap(size_, other.size_);
-            std::swap_ranges(begin(), end(), other.begin());
+            std::swap(buffer_, other.buffer_);
         }
 
     private:
