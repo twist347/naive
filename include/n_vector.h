@@ -85,7 +85,7 @@ namespace naive {
 
         constexpr ~vector() {
             for (size_t i = 0; i < size_; ++i) {
-                alloc_.destruct(buffer_ + i);
+                alloc_.destroy(buffer_ + i);
             }
             alloc_.deallocate(buffer_, capacity_);
         }
@@ -165,7 +165,7 @@ namespace naive {
             auto new_buffer = alloc_.allocate(new_cap);
             for (size_type i = 0; i < size_; ++i) {
                 alloc_.construct(new_buffer + i, std::move(buffer_[i]));
-                alloc_.destruct(buffer_ + i);
+                alloc_.destroy(buffer_ + i);
             }
             alloc_.deallocate(buffer_, size_);
             capacity_ = new_cap;
@@ -179,7 +179,7 @@ namespace naive {
             auto new_buffer = alloc_.allocate(size_);
             for (size_type i = 0; i < size_; ++i) {
                 alloc_.construct(new_buffer + i, std::move(buffer_[i]));
-                alloc_.destruct(buffer_ + i);
+                alloc_.destroy(buffer_ + i);
             }
             alloc_.deallocate(buffer_, capacity_);
             buffer_ = new_buffer;
@@ -190,7 +190,7 @@ namespace naive {
 
         constexpr void clear() noexcept {
             for (size_type i = 0; i < size_; ++i) {
-                alloc_.destruct(buffer_ + i);
+                alloc_.destroy(buffer_ + i);
             }
             size_ = 0;
         }
@@ -200,7 +200,7 @@ namespace naive {
             for (size_type i = idx; i < size_ - 1; ++i) {
                 buffer_[i] = std::move(buffer_[i + 1]);
             }
-            alloc_.destruct(buffer_ + size_ - 1);
+            alloc_.destroy(buffer_ + size_ - 1);
             --size_;
             return buffer_ + idx;
         }
@@ -252,7 +252,7 @@ namespace naive {
                 auto new_buffer = alloc_.allocate(new_size);
                 for (size_type i = 0; i < size_; ++i) {
                     alloc_.construct(new_buffer + i, std::move(buffer_[i]));
-                    alloc_.destruct(buffer_ + i);
+                    alloc_.destroy(buffer_ + i);
                 }
                 for (size_type i = size_; i < new_size; ++i) {
                     alloc_.construct(new_buffer + i);
@@ -263,7 +263,7 @@ namespace naive {
                 buffer_ = new_buffer;
             } else {
                 for (size_type i = new_size; i < size_; ++i) {
-                    alloc_.destruct(buffer_ + i);
+                    alloc_.destroy(buffer_ + i);
                 }
                 size_ = new_size;
             }
@@ -319,7 +319,7 @@ namespace naive {
 
         constexpr void destruct_and_dealloc(alloc_ptr ptr, size_type n_obj) {
             for (size_type i = 0; i < n_obj; ++i) {
-                alloc_.destruct(ptr + i);
+                alloc_.destroy(ptr + i);
             }
             alloc_.deallocate(ptr, n_obj);
         }
