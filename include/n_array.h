@@ -23,6 +23,8 @@ namespace naive {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = std::ptrdiff_t;
 
+        // ctors and dtor
+
         constexpr array() : size_(static_cast<size_type>(0)), buffer_(nullptr) {}
 
         constexpr explicit array(size_type size) : size_(size), buffer_(construct_buffer_(size_)) {}
@@ -31,7 +33,8 @@ namespace naive {
             std::fill(begin(), end(), val);
         }
 
-        constexpr array(std::initializer_list<value_type> il) : size_(il.size()), buffer_(construct_buffer_(size_)) {
+        constexpr array(std::initializer_list<value_type> il) : size_(il.size()),
+                                                                buffer_(construct_buffer_(size_)) {
             std::copy(il.begin(), il.end(), begin());
         }
 
@@ -152,7 +155,7 @@ namespace naive {
     private:
         Allocator alloc_;
         size_type size_;
-        value_type *buffer_;
+        pointer buffer_;
 
         using alloc_ptr = decltype(alloc_)::pointer;
 

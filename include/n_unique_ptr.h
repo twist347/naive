@@ -203,7 +203,6 @@ namespace naive {
         pointer ptr_;
     };
 
-
     template<class T, class ...Args>
     requires(!std::is_array_v<T>)
     constexpr auto make_unique(Args &&...args) {
