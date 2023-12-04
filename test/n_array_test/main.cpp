@@ -193,7 +193,7 @@ TEST(TestNaiveArray, SizeandEmptyMethodsTest) {
     ASSERT_EQ(earr.size(), 0);
     ASSERT_TRUE(earr.empty());
 
-    ASSERT_EQ(arr.size(), naive::utils::to<decltype(earr)::size_type>(3));
+    ASSERT_EQ(arr.size(), static_cast<decltype(earr)::size_type>(3));
     ASSERT_FALSE(arr.empty());
 }
 

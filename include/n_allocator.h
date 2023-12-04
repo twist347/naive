@@ -19,16 +19,24 @@ namespace naive {
         }
 
         constexpr void deallocate(pointer ptr, size_type size) {
-            operator delete(ptr);
+            ::operator delete(ptr);
         }
 
         template<class ... Args>
         constexpr void construct(pointer ptr, Args &&... args) {
-            new(ptr) value_type(std::forward<Args>(args)...);
+            ::new(static_cast<void *>(ptr)) value_type(std::forward<Args>(args)...);
         }
 
-        constexpr void destruct(pointer ptr) {
+        constexpr void destroy(pointer ptr) {
             ptr->~value_type();
+        }
+
+        constexpr const_pointer address(const_reference ref) const noexcept {
+            return std::addressof(ref);
+        }
+
+        size_type max_size() const noexcept {
+            return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
     };
 }

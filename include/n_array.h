@@ -2,11 +2,13 @@
 
 #include <iostream>
 #include <algorithm>
-#include <n_utils.h>
+#include <n_allocator.h>
 
 namespace naive {
 
-    template<concepts::is_array_el T>
+    // heap array implementation
+
+    template<class T, class Allocator = naive::allocator<T>>
     class array {
     public:
         using value_type = T;
@@ -21,20 +23,20 @@ namespace naive {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = std::ptrdiff_t;
 
-        constexpr array() : size_(utils::to<size_type>(0)), buffer_(nullptr) {}
+        constexpr array() : size_(static_cast<size_type>(0)), buffer_(nullptr) {}
 
-        constexpr explicit array(size_type size) : size_(size), buffer_(construct(size_)) {}
+        constexpr explicit array(size_type size) : size_(size), buffer_(construct_buffer_(size_)) {}
 
-        constexpr array(size_type size, const value_type &val) : size_(size), buffer_(construct(size_)) {
+        constexpr array(size_type size, const value_type &val) : size_(size), buffer_(construct_buffer_(size_)) {
             std::fill(begin(), end(), val);
         }
 
-        constexpr array(std::initializer_list<value_type> il) : size_(il.size()), buffer_(construct(size_)) {
+        constexpr array(std::initializer_list<value_type> il) : size_(il.size()), buffer_(construct_buffer_(size_)) {
             std::copy(il.begin(), il.end(), begin());
         }
 
         constexpr array(const array &other) : size_(other.size_) {
-            auto new_buffer = construct(size_);
+            auto new_buffer = construct_buffer_(size_);
             std::copy(other.buffer_, other.buffer_ + other.size_, new_buffer);
             buffer_ = new_buffer;
         }
@@ -44,16 +46,16 @@ namespace naive {
                 return *this;
             }
             if (size_ != other.size_) {
-                destruct(buffer_);
-                buffer_ = construct(other.size_);
+                destruct_buffer_(buffer_, size_);
+                buffer_ = construct_buffer_(other.size_);
+                size_ = other.size_;
             }
             std::copy(other.buffer_, other.buffer_ + other.size_, buffer_);
-            size_ = other.size_;
             return *this;
         }
 
         constexpr array(array &&other) noexcept: size_(other.size_), buffer_(other.buffer_) {
-            other.size_ = 0;
+            other.size_ = static_cast<size_type>(0);
             other.buffer_ = nullptr;
         }
 
@@ -61,23 +63,24 @@ namespace naive {
             if (this == &other) {
                 return *this;
             }
-            destruct(buffer_);
+
+            destruct_buffer_(buffer_, size_);
 
             buffer_ = std::exchange(other.buffer_, nullptr);
-            size_ = std::exchange(other.size_, naive::utils::to<size_type>(0));
+            size_ = std::exchange(other.size_, static_cast<size_type>(0));
 
             return *this;
         }
 
         constexpr ~array() {
-            destruct(buffer_);
+            destruct_buffer_(buffer_, size_);
         }
 
         // element access
 
-        constexpr reference operator[](size_type idx) { return buffer_[idx]; }
+        constexpr reference operator[](size_type idx) { return data()[idx]; }
 
-        constexpr const_reference operator[](size_type idx) const noexcept { return buffer_[idx]; }
+        constexpr const_reference operator[](size_type idx) const noexcept { return data()[idx]; }
 
         constexpr pointer data() { return static_cast<pointer>(buffer_); }
 
@@ -97,13 +100,13 @@ namespace naive {
             return buffer_[idx];
         }
 
-        constexpr reference front() noexcept { return buffer_[utils::to<size_type>(0)]; }
+        constexpr reference front() noexcept { return data()[static_cast<size_type>(0)]; }
 
-        constexpr const_reference front() const noexcept { return buffer_[utils::to<size_type>(0)]; }
+        constexpr const_reference front() const noexcept { return data()[static_cast<size_type>(0)]; }
 
-        constexpr reference back() noexcept { return buffer_[utils::to<size_type>(size_ - 1)]; }
+        constexpr reference back() noexcept { return data()[static_cast<size_type>(size() - 1)]; }
 
-        constexpr const_reference back() const noexcept { return buffer_[utils::to<size_type>(size_ - 1)]; }
+        constexpr const_reference back() const noexcept { return data()[static_cast<size_type>(size() - 1)]; }
 
         // iterators
 
@@ -111,9 +114,9 @@ namespace naive {
 
         constexpr const_iterator begin() const noexcept { return const_iterator(data()); }
 
-        constexpr iterator end() noexcept { return iterator(data() + size_); }
+        constexpr iterator end() noexcept { return iterator(data() + size()); }
 
-        constexpr const_iterator end() const noexcept { return const_iterator(data() + size_); }
+        constexpr const_iterator end() const noexcept { return const_iterator(data() + size()); }
 
         constexpr reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
 
@@ -125,7 +128,7 @@ namespace naive {
 
         constexpr const_iterator cbegin() const noexcept { return const_iterator(data()); }
 
-        constexpr const_iterator cend() const noexcept { return const_iterator(data() + size_); }
+        constexpr const_iterator cend() const noexcept { return const_iterator(data() + size()); }
 
         constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
 
@@ -135,7 +138,7 @@ namespace naive {
 
         constexpr size_type size() const noexcept { return size_; }
 
-        constexpr bool empty() const noexcept { return size() == naive::utils::to<size_type>(0); }
+        constexpr bool empty() const noexcept { return size() == static_cast<size_type>(0); }
 
         // operations
 
@@ -147,21 +150,32 @@ namespace naive {
         }
 
     private:
-        constexpr pointer construct(size_type size) {
-            return new value_type[size];
-        }
-
-        constexpr void destruct(pointer buffer) {
-            delete[] buffer;
-        }
-
+        Allocator alloc_;
         size_type size_;
         value_type *buffer_;
+
+        using alloc_ptr = decltype(alloc_)::pointer;
+
+        template<class ... Args>
+        constexpr alloc_ptr construct_buffer_(size_type count, Args&& ... args) {
+            auto buffer = alloc_.allocate(count);
+            for (size_type i = 0; i < count; ++i) {
+                alloc_.construct(buffer + i, std::forward<Args>(args)...);
+            }
+            return buffer;
+        }
+
+        constexpr void destruct_buffer_(pointer buffer, size_type count) {
+            for (size_type i = 0; i < count; ++i) {
+                alloc_.destroy(buffer + i);
+            }
+            alloc_.deallocate(buffer, count);
+        }
     };
 
     // print
 
-    template<concepts::is_array_el T>
+    template<class T>
     std::ostream &operator<<(std::ostream &os, const array<T> &arr) {
         std::for_each(arr.begin(), arr.end(), [&os](const auto &val) { os << val << ' '; });
         return os;
@@ -169,7 +183,7 @@ namespace naive {
 
     // comparisons
 
-    template<concepts::is_array_el T>
+    template<class T>
     constexpr bool operator==(const array<T> &lhs, const array<T> &rhs) {
         if (lhs.size() != rhs.size()) {
             return false;
@@ -177,7 +191,7 @@ namespace naive {
         return std::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
 
-    template<concepts::is_array_el T>
+    template<class T>
     constexpr bool operator!=(const array<T> &lhs, const array<T> &rhs) {
         return !(lhs == rhs);
     }
