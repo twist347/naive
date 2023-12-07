@@ -14,7 +14,7 @@ namespace naive {
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
 
-        constexpr pointer allocate(size_type n) {
+        [[nodiscard]] constexpr pointer allocate(size_type n) {
             return n == 0 ? nullptr : static_cast<pointer>(::operator new(n * sizeof(value_type)));
         }
 
@@ -31,11 +31,15 @@ namespace naive {
             ptr->~value_type();
         }
 
-        constexpr const_pointer address(const_reference ref) const noexcept {
+        constexpr pointer address(reference ref) const noexcept {
             return std::addressof(ref);
         }
 
-        size_type max_size() const noexcept {
+        constexpr const_pointer address(const_reference ref) const noexcept {
+            return static_cast<const_pointer>(std::addressof(ref));
+        }
+
+        [[nodiscard]] size_type max_size() const noexcept {
             return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
     };

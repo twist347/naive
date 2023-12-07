@@ -41,7 +41,6 @@ TEST(TestUniquePtr, ConstructorCustomDeleter) {
 TEST(TestUniquePtr, ConstructorCustomDeleterArray) {
     auto del = [](int *ptr) { delete[] ptr; };
     naive::unique_ptr<int[], decltype(del)> up(new int[3]{1, 2, 3}, del);
-    std::cout << sizeof(up) << '\n';
     ASSERT_EQ(up[0], 1);
     ASSERT_EQ(up[1], 2);
     ASSERT_EQ(up[2], 3);
@@ -136,6 +135,7 @@ TEST(TestUniquePtr, SwapMethod) {
 TEST(TestUniquePtr, GetMethod) {
     naive::unique_ptr<int> up(new int{5});
     auto ptr = up.get();
+    ASSERT_EQ(ptr, &*(up));
     ASSERT_EQ(*ptr, 5);
 }
 
@@ -167,8 +167,9 @@ TEST(TestUniquePtr, OperatorBool) {
     ASSERT_TRUE(flag_up);
 
     naive::unique_ptr<int> other;
-    bool flag_other = up ? true : false;
-    ASSERT_TRUE(flag_other);
+    bool flag_other = other ? true : false;
+    std::cout << flag_other << '\n';
+    ASSERT_TRUE(!flag_other);
 }
 
 TEST(TestUniquePtr, ThreeWayComparisonOperator) {

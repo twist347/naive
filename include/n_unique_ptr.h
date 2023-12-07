@@ -12,6 +12,8 @@ namespace naive {
         using element_type = T;
         using deleter_type = Deleter;
 
+        // ctors and dtor
+
         constexpr unique_ptr() : ptr_(nullptr) {}
 
         constexpr explicit unique_ptr(pointer ptr) : ptr_(ptr) {}
@@ -128,6 +130,8 @@ namespace naive {
         using pointer = T *;
         using element_type = T;
         using deleter_type = Deleter;
+
+        // ctors and dtor
 
         constexpr explicit unique_ptr(pointer ptr) : ptr_(ptr) {}
 
