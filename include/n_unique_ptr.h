@@ -49,7 +49,7 @@ namespace naive {
         }
 
         constexpr element_type &operator[](std::size_t idx) const requires std::is_array_v<T> {
-            return ptr_[idx];
+            return get()[idx];
         }
 
         // modifiers
