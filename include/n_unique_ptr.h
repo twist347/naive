@@ -8,8 +8,8 @@ namespace naive {
     template<class T, class Deleter = naive::default_delete<T>>
     class unique_ptr : private Deleter {
     public:
-        using pointer = T *;
-        using element_type = T;
+        using element_type = std::remove_extent_t<T>;
+        using pointer = element_type *;
         using deleter_type = Deleter;
 
         // ctors and dtor
@@ -40,18 +40,22 @@ namespace naive {
             get_deleter()(ptr_);
         }
 
-        constexpr T &operator*() const {
+        constexpr element_type &operator*() const requires (!std::is_array_v<T>) {
             return *ptr_;
         }
 
-        constexpr T *operator->() const {
+        constexpr pointer operator->() const requires (!std::is_array_v<T>) {
             return ptr_;
+        }
+
+        constexpr element_type &operator[](std::size_t idx) const requires std::is_array_v<T> {
+            return ptr_[idx];
         }
 
         // modifiers
 
-        constexpr T *release() {
-            T *copy_ptr = ptr_;
+        constexpr pointer release() {
+            auto copy_ptr = ptr_;
             ptr_ = nullptr;
             return copy_ptr;
         }
@@ -74,7 +78,7 @@ namespace naive {
 
         // observers
 
-        constexpr T *get() const noexcept {
+        constexpr pointer get() const noexcept {
             return ptr_;
         }
 
@@ -123,89 +127,6 @@ namespace naive {
     constexpr bool operator>=(const unique_ptr<T, D> &lhs, const unique_ptr<T, D> &rhs) {
         return !(lhs < rhs);
     }
-
-    template<class T, class Deleter>
-    class unique_ptr<T[], Deleter> : private Deleter {
-    public:
-        using pointer = T *;
-        using element_type = T;
-        using deleter_type = Deleter;
-
-        // ctors and dtor
-
-        constexpr explicit unique_ptr(pointer ptr) : ptr_(ptr) {}
-
-        constexpr unique_ptr(pointer ptr, const Deleter &deleter) : Deleter(deleter), ptr_(ptr) {}
-
-        constexpr unique_ptr(const unique_ptr &) = delete;
-
-        constexpr unique_ptr &operator=(const unique_ptr &) = delete;
-
-        constexpr unique_ptr(unique_ptr &&other) noexcept: ptr_(other.ptr_) {
-            other.ptr_ = nullptr;
-        }
-
-        constexpr unique_ptr &operator=(unique_ptr &&other) noexcept {
-            if (this == &other) {
-                return *this;
-            }
-            reset(other.release());
-            return *this;
-        }
-
-        constexpr ~unique_ptr() {
-            get_deleter()(ptr_);
-        }
-
-        constexpr T &operator[](std::size_t idx) const {
-            return ptr_[idx];
-        }
-
-        // modifiers
-
-        constexpr T *release() {
-            T *copy_ptr = ptr_;
-            ptr_ = nullptr;
-            return copy_ptr;
-        }
-
-        constexpr void reset(pointer ptr = nullptr) noexcept {
-            if (ptr == ptr_) {
-                return;
-            }
-            auto copy = ptr_;
-            ptr_ = ptr;
-            if (copy) {
-                get_deleter()(copy);
-            }
-        }
-
-        constexpr void swap(unique_ptr &other) noexcept {
-            std::swap(ptr_, other.ptr_);
-            std::swap(static_cast<deleter_type &>(*this), static_cast<deleter_type &>(other));
-        }
-
-        // observers
-
-        constexpr T *get() const noexcept {
-            return ptr_;
-        }
-
-        constexpr deleter_type &get_deleter() noexcept {
-            return static_cast<deleter_type &>(*this);
-        }
-
-        constexpr const deleter_type &get_deleter() const noexcept {
-            return static_cast<const deleter_type &>(*this);
-        }
-
-        explicit operator bool() const noexcept {
-            return get() != nullptr;
-        }
-
-    private:
-        pointer ptr_;
-    };
 
     template<class T, class ...Args>
     requires(!std::is_array_v<T>)
