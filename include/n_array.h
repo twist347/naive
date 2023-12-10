@@ -38,10 +38,8 @@ namespace naive {
             std::copy(il.begin(), il.end(), begin());
         }
 
-        constexpr array(const array &other) : size_(other.size_) {
-            auto new_buffer = construct_buffer_(size_);
-            std::copy(other.buffer_, other.buffer_ + other.size_, new_buffer);
-            buffer_ = new_buffer;
+        constexpr array(const array &other) : size_(other.size_), buffer_(construct_buffer_(size_)) {
+            std::copy(other.buffer_, other.buffer_ + other.size_, data());
         }
 
         constexpr array &operator=(const array &other) {
@@ -53,7 +51,7 @@ namespace naive {
                 buffer_ = construct_buffer_(other.size_);
                 size_ = other.size_;
             }
-            std::copy(other.buffer_, other.buffer_ + other.size_, buffer_);
+            std::copy(other.buffer_, other.buffer_ + other.size_, data());
             return *this;
         }
 
@@ -93,49 +91,49 @@ namespace naive {
             if (idx >= size_) {
                 throw std::out_of_range("out of bound");
             }
-            return buffer_[idx];
+            return data()[idx];
         }
 
         constexpr const_reference at(size_type idx) const {
             if (idx >= size_) {
                 throw std::out_of_range("out of bound");
             }
-            return buffer_[idx];
+            return data()[idx];
         }
 
-        constexpr reference front() noexcept { return data()[static_cast<size_type>(0)]; }
+        constexpr reference front() noexcept { return *begin(); }
 
-        constexpr const_reference front() const noexcept { return data()[static_cast<size_type>(0)]; }
+        constexpr const_reference front() const noexcept { return *begin(); }
 
-        constexpr reference back() noexcept { return data()[static_cast<size_type>(size() - 1)]; }
+        constexpr reference back() noexcept { return *(end() - 1); }
 
-        constexpr const_reference back() const noexcept { return data()[static_cast<size_type>(size() - 1)]; }
+        constexpr const_reference back() const noexcept { return *(end() - 1); }
 
         // iterators
 
-        constexpr iterator begin() noexcept { return iterator(data()); }
+        constexpr iterator begin() noexcept { return data(); }
 
-        constexpr const_iterator begin() const noexcept { return const_iterator(data()); }
+        constexpr const_iterator begin() const noexcept { return data(); }
 
-        constexpr iterator end() noexcept { return iterator(data() + size()); }
+        constexpr iterator end() noexcept { return begin() + size(); }
 
-        constexpr const_iterator end() const noexcept { return const_iterator(data() + size()); }
+        constexpr const_iterator end() const noexcept { return begin() + size(); }
 
-        constexpr reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+        constexpr const_iterator cbegin() const noexcept { return begin(); }
 
-        constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+        constexpr const_iterator cend() const noexcept { return end(); }
 
-        constexpr reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+        constexpr reverse_iterator rbegin() noexcept { return static_cast<reverse_iterator>(end()); }
 
-        constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+        constexpr const_reverse_iterator rbegin() const noexcept { return static_cast<const_reverse_iterator>(end()); }
 
-        constexpr const_iterator cbegin() const noexcept { return const_iterator(data()); }
+        constexpr reverse_iterator rend() noexcept { return static_cast<reverse_iterator>(begin()); }
 
-        constexpr const_iterator cend() const noexcept { return const_iterator(data() + size()); }
+        constexpr const_reverse_iterator rend() const noexcept { return static_cast<const_reverse_iterator>(begin()); }
 
-        constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
+        constexpr const_reverse_iterator crbegin() const noexcept { return static_cast<const_reverse_iterator>(end()); }
 
-        constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
+        constexpr const_reverse_iterator crend() const noexcept { return static_cast<const_reverse_iterator>(begin()); }
 
         // capacity
 
@@ -160,7 +158,7 @@ namespace naive {
         using alloc_ptr = decltype(alloc_)::pointer;
 
         template<class ... Args>
-        constexpr alloc_ptr construct_buffer_(size_type count, Args&& ... args) {
+        constexpr alloc_ptr construct_buffer_(size_type count, Args &&... args) {
             auto buffer = alloc_.allocate(count);
             for (size_type i = 0; i < count; ++i) {
                 alloc_.construct(buffer + i, std::forward<Args>(args)...);
