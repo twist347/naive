@@ -9,9 +9,8 @@ namespace naive {
     class point {
     public:
         template<class ... Args>
-        constexpr point(Args &&... args)requires (sizeof...(Args) == D)
-            && (std::is_same_v<T, std::remove_cvref_t<Args>> && ...)
-                : coords{ std::forward<Args>(args)... } {}
+        constexpr point(Args &&... args) requires (sizeof...(Args) == D)
+            && (std::is_same_v<T, std::remove_cvref_t<Args>> && ...) : coords{ std::forward<Args>(args)... } {}
 
         constexpr T &operator[](size_t idx) {
             return coords[idx];

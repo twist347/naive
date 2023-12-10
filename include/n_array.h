@@ -29,29 +29,28 @@ namespace naive {
 
         constexpr explicit array(size_type size) : size_(size), buffer_(construct_buffer_(size_)) {}
 
-        constexpr array(size_type size, const value_type &val) : size_(size), buffer_(construct_buffer_(size_)) {
+        constexpr array(size_type size, const value_type &val) : array(size) {
             std::fill(begin(), end(), val);
         }
 
-        constexpr array(std::initializer_list<value_type> il) : size_(il.size()),
-                                                                buffer_(construct_buffer_(size_)) {
+        constexpr array(std::initializer_list<value_type> il) : array(il.size()) {
             std::copy(il.begin(), il.end(), begin());
         }
 
         constexpr array(const array &other) : size_(other.size_), buffer_(construct_buffer_(size_)) {
-            std::copy(other.buffer_, other.buffer_ + other.size_, data());
+            std::copy(other.begin(), other.end(), begin());
         }
 
         constexpr array &operator=(const array &other) {
             if (this == &other) {
                 return *this;
             }
-            if (size_ != other.size_) {
+            if (size_ != other.size()) {
                 destruct_buffer_(buffer_, size_);
-                buffer_ = construct_buffer_(other.size_);
-                size_ = other.size_;
+                buffer_ = construct_buffer_(other.size());
+                size_ = other.size();
             }
-            std::copy(other.buffer_, other.buffer_ + other.size_, data());
+            std::copy(other.begin(), other.end(), begin());
             return *this;
         }
 
@@ -79,26 +78,26 @@ namespace naive {
 
         // element access
 
-        constexpr reference operator[](size_type idx) { return data()[idx]; }
+        constexpr reference operator[](size_type idx) { return begin()[idx]; }
 
-        constexpr const_reference operator[](size_type idx) const noexcept { return data()[idx]; }
+        constexpr const_reference operator[](size_type idx) const noexcept { return begin()[idx]; }
 
-        constexpr pointer data() { return static_cast<pointer>(buffer_); }
+        constexpr pointer data() { return buffer_; }
 
-        constexpr const_pointer data() const { return static_cast<const_pointer>(buffer_); }
+        constexpr const_pointer data() const { return buffer_; }
 
         constexpr reference at(size_type idx) {
             if (idx >= size_) {
                 throw std::out_of_range("out of bound");
             }
-            return data()[idx];
+            return operator[](idx);
         }
 
         constexpr const_reference at(size_type idx) const {
             if (idx >= size_) {
                 throw std::out_of_range("out of bound");
             }
-            return data()[idx];
+            return operator[](idx);
         }
 
         constexpr reference front() noexcept { return *begin(); }
