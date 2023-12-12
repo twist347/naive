@@ -40,17 +40,11 @@ namespace naive {
             get_deleter()(ptr_);
         }
 
-        constexpr element_type &operator*() const requires (!std::is_array_v<T>) {
-            return *ptr_;
-        }
+        constexpr element_type &operator*() const requires (!std::is_array_v<T>) { return *ptr_; }
 
-        constexpr pointer operator->() const requires (!std::is_array_v<T>) {
-            return ptr_;
-        }
+        constexpr pointer operator->() const requires (!std::is_array_v<T>) { return ptr_; }
 
-        constexpr element_type &operator[](std::size_t idx) const requires std::is_array_v<T> {
-            return get()[idx];
-        }
+        constexpr element_type &operator[](std::size_t idx) const requires std::is_array_v<T> { return get()[idx]; }
 
         // modifiers
 
@@ -73,26 +67,19 @@ namespace naive {
 
         constexpr void swap(unique_ptr &other) noexcept {
             std::swap(ptr_, other.ptr_);
+            // TODO: is it?
             std::swap(static_cast<deleter_type &>(*this), static_cast<deleter_type &>(other));
         }
 
         // observers
 
-        constexpr pointer get() const noexcept {
-            return ptr_;
-        }
+        constexpr pointer get() const noexcept { return ptr_; }
 
-        constexpr deleter_type &get_deleter() noexcept {
-            return static_cast<deleter_type &>(*this);
-        }
+        constexpr deleter_type &get_deleter() noexcept { return static_cast<deleter_type &>(*this); }
 
-        constexpr const deleter_type &get_deleter() const noexcept {
-            return static_cast<const deleter_type &>(*this);
-        }
+        constexpr const deleter_type &get_deleter() const noexcept { return static_cast<const deleter_type &>(*this); }
 
-        explicit operator bool() const noexcept {
-            return get() != nullptr;
-        }
+        explicit operator bool() const noexcept { return get() != nullptr; }
 
     private:
         pointer ptr_;

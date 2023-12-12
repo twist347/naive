@@ -4,6 +4,8 @@
 
 namespace naive {
 
+    // stateless allocator
+
     template<class T>
     struct allocator {
         using value_type = T;
@@ -13,6 +15,14 @@ namespace naive {
         using const_reference = const value_type &;
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
+
+        // coercion ctor
+        template<class U>
+        constexpr allocator(const allocator<U> &) {}
+
+        constexpr allocator() = default;
+
+        constexpr allocator(const allocator &) = default;
 
         [[nodiscard]] constexpr pointer allocate(size_type n) {
             return n == 0 ? nullptr : static_cast<pointer>(::operator new(n * sizeof(value_type)));
@@ -43,5 +53,15 @@ namespace naive {
             return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
     };
+
+    template<class T>
+    bool operator==(const allocator<T> &, const allocator<T> &) {
+        return true;
+    }
+
+    template<class T>
+    bool operator!=(const allocator<T> &, const allocator<T> &) {
+        return false;
+    }
 }
 

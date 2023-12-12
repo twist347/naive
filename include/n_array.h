@@ -29,6 +29,9 @@ namespace naive {
 
         constexpr explicit array(size_type size) : size_(size), buffer_(construct_buffer_(size_)) {}
 
+        constexpr array(size_type size, const Allocator &alloc) : alloc_(alloc), size_(size),
+                                                                  buffer_(construct_buffer_(size_)) {}
+
         constexpr array(size_type size, const value_type &val) : array(size) {
             std::fill(begin(), end(), val);
         }
@@ -37,7 +40,8 @@ namespace naive {
             std::copy(il.begin(), il.end(), begin());
         }
 
-        constexpr array(const array &other) : size_(other.size_), buffer_(construct_buffer_(size_)) {
+        constexpr array(const array &other) : alloc_(other.alloc_), size_(other.size_),
+                                              buffer_(construct_buffer_(size_)) {
             std::copy(other.begin(), other.end(), begin());
         }
 
@@ -45,8 +49,11 @@ namespace naive {
             if (this == &other) {
                 return *this;
             }
-            if (size_ != other.size()) {
-                destruct_buffer_(buffer_, size_);
+            if (alloc_ != other.alloc_) {
+                alloc_ = other.alloc_;
+            }
+            if (size() != other.size()) {
+                destruct_buffer_(buffer_, size());
                 buffer_ = construct_buffer_(other.size());
                 size_ = other.size();
             }
@@ -54,10 +61,10 @@ namespace naive {
             return *this;
         }
 
-        constexpr array(array &&other) noexcept: size_(other.size_), buffer_(other.buffer_) {
-            other.size_ = static_cast<size_type>(0);
-            other.buffer_ = nullptr;
-        }
+        constexpr array(array &&other) noexcept:
+                alloc_(std::move(other.alloc_)),
+                size_(std::exchange(other.size_, static_cast<size_type>(0))),
+                buffer_(std::exchange(other.buffer_, nullptr)) {}
 
         constexpr array &operator=(array &&other) noexcept {
             if (this == &other) {
@@ -66,8 +73,9 @@ namespace naive {
 
             destruct_buffer_(buffer_, size_);
 
-            buffer_ = std::exchange(other.buffer_, nullptr);
+            alloc_ = std::move(alloc_);
             size_ = std::exchange(other.size_, static_cast<size_type>(0));
+            buffer_ = std::exchange(other.buffer_, nullptr);
 
             return *this;
         }

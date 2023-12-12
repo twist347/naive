@@ -21,67 +21,70 @@ namespace naive {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        explicit constexpr string(const Allocator&alloc = Allocator()) : alloc_(alloc),
-                                                                         size_(static_cast<size_type>(0)),
-                                                                         capacity_(min_capacity),
-                                                                         buffer_(alloc_.allocate(capacity_)) {
+        explicit constexpr string(const Allocator &alloc = Allocator()) : alloc_(alloc),
+                                                                          size_(static_cast<size_type>(0)),
+                                                                          capacity_(min_capacity),
+                                                                          buffer_(alloc_.allocate(capacity_)) {
             buffer_[0] = '\0';
         }
-
 
         constexpr string(size_t count, CharT ch) : size_(count),
                                                    capacity_(size_ < min_capacity ? min_capacity : size_ + 1),
                                                    buffer_(alloc_.allocate(capacity_)) {
-            std::memset(buffer_, ch, size_ * sizeof(CharT));
+            std::memset(begin(), ch, size() * sizeof(CharT));
             buffer_[size_] = '\0';
+            assert(size() < capacity());
         }
 
-        constexpr string(const CharT* c_str, size_type count) : size_(count),
+        constexpr string(const CharT *c_str, size_type count) : size_(count),
                                                                 capacity_(size_ < min_capacity
-                                                                              ? min_capacity
-                                                                              : size_ + 1),
+                                                                          ? min_capacity
+                                                                          : size_ + 1),
                                                                 buffer_(alloc_.allocate(capacity_)) {
-            std::memcpy(buffer_, c_str, size_ * sizeof(CharT));
+            std::memcpy(begin(), c_str, size() * sizeof(CharT));
             buffer_[size_] = '\0';
         }
 
-        constexpr string(const CharT* c_str) : string(c_str, std::strlen(c_str)) {
-        }
+        constexpr string(const CharT *c_str) : string(c_str, std::strlen(c_str)) {}
 
-        constexpr string(const string&other) : alloc_(other.alloc_), size_(other.size_), capacity_(other.capacity_),
-                                               buffer_(alloc_.allocate(capacity_)) {
-            std::memcpy(buffer_, other.buffer_, size_ * sizeof(CharT));
+        constexpr string(const string &other) : alloc_(other.alloc_), size_(other.size_), capacity_(other.capacity_),
+                                                buffer_(alloc_.allocate(capacity_)) {
+            std::memcpy(begin(), other.begin(), size() * sizeof(CharT));
             buffer_[size_] = '\0';
         }
 
-        constexpr string& operator=(const string&other) {
-            auto copy = other;
-            std::swap(*this, copy);
-            return *this;
-        }
-
-        constexpr string(string&&other) noexcept: alloc_(std::move(other.alloc_)),
-                                                  size_(other.size_),
-                                                  capacity_(other.capacity_),
-                                                  buffer_(other.buffer_) {
-            other.size_ = static_cast<size_type>(0);
-            other.capacity_ = static_cast<size_type>(0);
-            other.buffer_ = nullptr;
-        }
-
-        constexpr string& operator=(string&&other) noexcept {
+        constexpr string &operator=(const string &other) {
             if (this == &other) {
                 return *this;
             }
-            alloc_.deallocate(buffer_, capacity_);
-            alloc_ = std::move(other.alloc_);
-            size_ = other.size_;
-            capacity_ = other.capacity_;
-            buffer_ = other.buffer_;
+            if (alloc_ != other.alloc_) {
+                alloc_ = other.alloc_;
+            }
+            if (size() != other.size()) {
+                alloc_.deallocate(buffer_, capacity());
+                size_ = other.size();
+                buffer_ = alloc_.allocate(size());
+            }
+            std::memcpy(begin(), other.begin(), size() * sizeof(CharT));
+            return *this;
+        }
 
-            other.size_ = static_cast<size_type>(0);
-            other.capacity_ = static_cast<size_type>(0);
-            other.buffer_ = nullptr;
+        constexpr string(string &&other) noexcept: alloc_(std::move(other.alloc_)),
+                                                   size_(std::exchange(other.size_, static_cast<size_type>(0))),
+                                                   capacity_(std::exchange(other.capacity_, static_cast<size_type>(0))),
+                                                   buffer_(std::exchange(other.buffer_, nullptr)) {}
+
+        constexpr string &operator=(string &&other) noexcept {
+            if (this == &other) {
+                return *this;
+            }
+
+            alloc_.deallocate(buffer_, capacity_);
+
+            alloc_ = std::move(other.alloc_);
+            size_ = std::exchange(other.size_, static_cast<size_type>(0));
+            capacity_ = std::exchange(other.capacity_, static_cast<size_type>(0));
+            buffer_ = std::exchange(other.buffer_, nullptr);
             return *this;
         }
 
@@ -95,71 +98,69 @@ namespace naive {
 
         // access
 
-        constexpr reference operator[](size_type idx) { return buffer_[idx]; }
+        constexpr reference operator[](size_type idx) { return begin()[idx]; }
 
-        constexpr const_reference operator[](size_type idx) const { return buffer_[idx]; }
+        constexpr const_reference operator[](size_type idx) const { return begin()[idx]; }
 
-        constexpr pointer data() { return static_cast<pointer>(buffer_); }
+        constexpr pointer data() { return buffer_; }
 
-        constexpr const_pointer data() const { return static_cast<const_pointer>(buffer_); }
+        constexpr const_pointer data() const { return buffer_; }
 
         constexpr reference at(size_type idx) {
             if (idx >= size_) {
                 throw std::out_of_range("out of bound");
             }
-            return buffer_[idx];
+            return operator[](idx);
         }
 
         constexpr const_reference at(size_type idx) const {
             if (idx >= size_) {
                 throw std::out_of_range("out of bound");
             }
-            return buffer_[idx];
+            return operator[](idx);
         }
 
-        constexpr reference front() noexcept { return buffer_[static_cast<size_type>(0)]; }
+        constexpr reference front() noexcept { return *begin(); }
 
-        constexpr const_reference front() const noexcept { return buffer_[static_cast<size_type>(0)]; }
+        constexpr const_reference front() const noexcept { return *begin(); }
 
-        constexpr reference back() noexcept { return buffer_[static_cast<size_type>(size_ - 1)]; }
+        constexpr reference back() noexcept { return *(end() - 1); }
 
-        constexpr const_reference back() const noexcept { return buffer_[static_cast<size_type>(size_ - 1)]; }
+        constexpr const_reference back() const noexcept { return *(end() - 1); }
 
-        constexpr const char* c_str() const noexcept {
-            return data();
-        }
+        constexpr const char *c_str() const noexcept { return data(); }
 
         // iterators
 
-        constexpr iterator begin() noexcept { return iterator(data()); }
+        constexpr iterator begin() noexcept { return data(); }
 
-        constexpr const_iterator begin() const noexcept { return const_iterator(data()); }
+        constexpr const_iterator begin() const noexcept { return data(); }
 
-        constexpr iterator end() noexcept { return iterator(data() + size_); }
+        constexpr iterator end() noexcept { return begin() + size(); }
 
-        constexpr const_iterator end() const noexcept { return const_iterator(data() + size_); }
+        constexpr const_iterator end() const noexcept { return begin() + size(); }
 
-        constexpr reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+        constexpr const_iterator cbegin() const noexcept { return begin(); }
 
-        constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+        constexpr const_iterator cend() const noexcept { return end(); }
 
-        constexpr reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+        constexpr reverse_iterator rbegin() noexcept { return static_cast<reverse_iterator>(end()); }
 
-        constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+        constexpr const_reverse_iterator rbegin() const noexcept { return static_cast<const_reverse_iterator>(end()); }
 
-        constexpr const_iterator cbegin() const noexcept { return const_iterator(data()); }
+        constexpr reverse_iterator rend() noexcept { return static_cast<reverse_iterator>(begin()); }
 
-        constexpr const_iterator cend() const noexcept { return const_iterator(data() + size_); }
+        constexpr const_reverse_iterator rend() const noexcept { return static_cast<const_reverse_iterator>(begin()); }
 
-        constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(end()); }
+        constexpr const_reverse_iterator crbegin() const noexcept { return static_cast<const_reverse_iterator>(end()); }
 
-        constexpr const_reverse_iterator crend() const noexcept { return const_reverse_iterator(begin()); }
+        constexpr const_reverse_iterator crend() const noexcept { return static_cast<const_reverse_iterator>(begin()); }
 
         // capacity
 
         constexpr size_type size() const noexcept { return size_; }
 
-        constexpr size_type length() const noexcept { return size_; }
+        constexpr size_type length() const noexcept { return size(); }
 
         constexpr size_type capacity() const noexcept { return capacity_; }
 
@@ -174,7 +175,7 @@ namespace naive {
             }
             new_cap = new_cap < min_capacity ? min_capacity : new_cap;
             auto new_buffer = alloc_.allocate(new_cap);
-            std::memcpy(new_buffer, buffer_, size_ * sizeof(CharT));
+            std::memcpy(new_buffer, begin(), size() * sizeof(CharT));
             new_buffer[size_] = '\0';
             alloc_.deallocate(buffer_, capacity_);
             buffer_ = new_buffer;
@@ -184,12 +185,12 @@ namespace naive {
 
         constexpr void shrink_to_fit() {
             assert(size_ < capacity_);
-            if (capacity_ <= size_ + 1 || capacity_ == min_capacity) {
+            if (capacity_ == size_ + 1 || capacity_ == min_capacity) {
                 return;
             }
             // TODO: maybe realloc
             auto new_buffer = alloc_.allocate(size_ + 1);
-            std::memcpy(new_buffer, buffer_, size_ * sizeof(CharT));
+            std::memcpy(new_buffer, begin(), size() * sizeof(CharT));
             new_buffer[size_] = '\0';
             alloc_.deallocate(buffer_, capacity_);
             capacity_ = size_ + 1;
@@ -211,7 +212,7 @@ namespace naive {
                 return;
             }
             if (new_size < size_) {
-                buffer_[size_] = '\0';
+                buffer_[new_size] = '\0';
                 size_ = new_size;
             } else {
                 if (new_size >= capacity_) {
@@ -226,7 +227,7 @@ namespace naive {
         }
 
     private:
-        const static size_type min_capacity = 8;
+        constexpr static size_type min_capacity = 8;
 
         Allocator alloc_;
         size_type size_;
@@ -237,8 +238,21 @@ namespace naive {
     // print
 
     template<class T>
-    std::ostream& operator<<(std::ostream&os, const naive::string<T>&str) {
+    std::ostream &operator<<(std::ostream &os, const naive::string<T> &str) {
         std::for_each(str.begin(), str.end(), [&os](auto ch) { os << ch; });
         return os;
+    }
+
+    template<class T>
+    bool operator==(const naive::string<T> &lhs, const naive::string<T> &rhs) {
+        if (lhs.size() != rhs.size()) {
+            return false;
+        }
+        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    }
+
+    template<class T>
+    bool operator!=(const naive::string<T> &lhs, const naive::string<T> &rhs) {
+        return !(lhs == rhs);
     }
 }
