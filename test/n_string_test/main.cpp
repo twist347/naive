@@ -240,10 +240,60 @@ TEST(TestNaiveString, ReserveMethodTest) {
     ASSERT_EQ(empty.capacity(), 20);
 }
 
+TEST(TestNaiveString, ShrinkToFitMethodTest) {
+    naive::string s{"hello"};
 
-TEST(A, B) {
-    naive::string s{"aaaaaaaaaaaaaaaaaaaa"};
-    std::cout << s.size() << ' ' << s.capacity() << '\n';
+    s.reserve(7);
+    s.shrink_to_fit();
+    ASSERT_EQ(s.size(), 5);
+    ASSERT_EQ(s.capacity(), min_capacity);
+    ASSERT_EQ(s, naive::string{"hello"});
+
+    s.reserve(20);
+    ASSERT_EQ(s.size(), 5);
+    ASSERT_EQ(s.capacity(), 20);
+    ASSERT_EQ(s, naive::string{"hello"});
+
+    s.shrink_to_fit();
+    ASSERT_EQ(s.size(), 5);
+    ASSERT_EQ(s.capacity(), min_capacity);
+    ASSERT_EQ(s, naive::string{"hello"});
+
+    naive::string empty;
+    empty.reserve(20);
+    empty.shrink_to_fit();
+    ASSERT_EQ(empty.size(), 0);
+    ASSERT_EQ(empty, naive::string{});
+    ASSERT_EQ(empty.capacity(), min_capacity);
+    empty.reserve(5);
+    empty.shrink_to_fit();
+    ASSERT_EQ(empty.capacity(), min_capacity);
+}
+
+TEST(TestNaiveString, ClearMethodTest) {
+    naive::string s{"hello"};
+    s.clear();
+    ASSERT_EQ(s.size(), 0);
+    ASSERT_EQ(s.capacity(), min_capacity);
+    naive::string empty;
+    ASSERT_EQ(empty.size(), 0);
+    ASSERT_EQ(empty.capacity(), min_capacity);
+}
+
+TEST(TestNaiveString, ResizeMethodTest) {
+    naive::string s{"hello"};
+    s.resize(3);
+    ASSERT_EQ(s.size(), 3);
+    ASSERT_EQ(s.capacity(), min_capacity);
+    ASSERT_EQ(s, naive::string{"hel"});
+    s.resize(20);
+    ASSERT_EQ(s.size(), 20);
+    ASSERT_EQ(s.capacity(), s.size() + 1);
+    s.resize(20);
+    ASSERT_EQ(s.size(), 20);
+    ASSERT_EQ(s.capacity(), s.size() + 1);
+    s.resize(10);
+    ASSERT_EQ(std::strcmp(s.c_str(), "hel"), 0);
 }
 
 int main(int argc, char** argv) {

@@ -193,7 +193,7 @@ namespace naive {
             std::memcpy(new_buffer, begin(), size() * sizeof(CharT));
             new_buffer[size_] = '\0';
             alloc_.deallocate(buffer_, capacity_);
-            capacity_ = size_ + 1;
+            capacity_ = size_ < min_capacity ? min_capacity : size_ + 1;
             buffer_ = new_buffer;
             assert(size_ < capacity_);
         }
@@ -216,7 +216,7 @@ namespace naive {
                 size_ = new_size;
             } else {
                 if (new_size >= capacity_) {
-                    reserve(2 * capacity_);
+                    reserve(2 * capacity_ > new_size ? 2 * capacity_: new_size + 1);
                 }
                 for (size_type i = size_; i < new_size; ++i) {
                     buffer_[i] = '\0';
