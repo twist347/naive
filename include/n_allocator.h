@@ -8,7 +8,7 @@ namespace naive {
 
     template<class T>
     struct allocator {
-        using value_type = T;
+        using value_type = std::remove_cvref_t<T>;
         using pointer = value_type *;
         using const_pointer = const pointer;
         using reference = value_type &;
@@ -37,7 +37,7 @@ namespace naive {
             ::new(static_cast<void *>(ptr)) value_type(std::forward<Args>(args)...);
         }
 
-        constexpr void destroy(pointer ptr) {
+        constexpr void destroy(pointer ptr) noexcept {
             ptr->~value_type();
         }
 

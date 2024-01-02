@@ -70,6 +70,14 @@ TEST(TestTypeTraits, IsRvalueReference) {
     ASSERT_TRUE(true);
 }
 
+TEST(TestTypeTraits, Rank) {
+    static_assert(naive::rank_v<int> == 0);
+    static_assert(naive::rank_v<int[]> == 1);
+    static_assert(naive::rank_v<int[][3]> == 2);
+    static_assert(naive::rank_v<int[][2][3]> == 3);
+    ASSERT_TRUE(true);
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

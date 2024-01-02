@@ -40,7 +40,8 @@ namespace naive {
             get_deleter()(ptr_);
         }
 
-        constexpr element_type &operator*() const requires (!std::is_array_v<T>) { return *ptr_; }
+        constexpr typename std::add_lvalue_reference_t<T>
+        operator*() const noexcept(noexcept(*std::declval<pointer>())) requires (!std::is_array_v<T>) { return *ptr_; }
 
         constexpr pointer operator->() const requires (!std::is_array_v<T>) { return ptr_; }
 
@@ -55,14 +56,12 @@ namespace naive {
         }
 
         constexpr void reset(pointer ptr = nullptr) noexcept {
-            if (ptr == ptr_) {
+            if (ptr == get()) {
                 return;
             }
-            auto copy = ptr_;
+            auto copy_ptr = get();
             ptr_ = ptr;
-            if (copy) {
-                get_deleter()(copy);
-            }
+            get_deleter()(copy_ptr);
         }
 
         constexpr void swap(unique_ptr &other) noexcept {

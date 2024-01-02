@@ -234,4 +234,44 @@ namespace naive {
     constexpr bool is_volatile_v = is_volatile<T>::value;
 
     // TODO: type properties
+
+    // TODO: supported operations
+
+    // property queries
+
+    template<class T>
+    struct alignment_of : integral_constant<std::size_t, alignof(T)> {};
+
+    template<class T>
+    constexpr std::size_t alignment_of_v = alignment_of<T>::value;
+
+    template<class T>
+    struct rank : integral_constant<std::size_t, 0> {};
+
+    template<class T>
+    struct rank<T[]> : integral_constant<std::size_t, rank<T>::value + 1> {};
+
+    template<class T, std::size_t N>
+    struct rank<T[N]> : integral_constant<std::size_t, rank<T>::value + 1> {};
+
+    template<class T>
+    constexpr std::size_t rank_v = rank<T>::value;
+
+    template<class T, unsigned N = 0>
+    struct extent : std::integral_constant<std::size_t, 0> {};
+
+    template<class T>
+    struct extent<T[], 0> : std::integral_constant<std::size_t, 0> {};
+
+    template<class T, unsigned N>
+    struct extent<T[], N> : std::extent<T, N - 1> {};
+
+    template<class T, std::size_t I>
+    struct extent<T[I], 0> : std::integral_constant<std::size_t, I> {};
+
+    template<class T, std::size_t I, unsigned N>
+    struct extent<T[I], N> : std::extent<T, N - 1> {};
+
+    template< class T, unsigned N = 0 >
+    constexpr std::size_t extent_v = extent<T, N>::value;
 }

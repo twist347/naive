@@ -3,24 +3,6 @@
 #include <gtest/gtest.h>
 #include <test_stuff/test_utils.h>
 
-template<class T>
-void quick_sort_recursive(T *arr, int left, int right) {
-    int i = left;
-    int j = right;
-    int pivot = arr[(left + right) / 2];
-    while (i <= j) {
-        while (arr[i] < pivot) ++i;
-        while (arr[j] > pivot) --j;
-        if (i <= j) {
-            std::swap(arr[i], arr[j]);
-            ++i;
-            --j;
-        }
-    }
-    if (j > left) quick_sort_recursive(arr, left, j);
-    if (i < right) quick_sort_recursive(arr, i, right);
-}
-
 TEST(TestNaiveSort, BubbleSort) {
     auto n = 10000;
     naive::vector<int> v(n);

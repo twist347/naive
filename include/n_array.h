@@ -3,15 +3,17 @@
 #include <iostream>
 #include <algorithm>
 #include <n_allocator.h>
+#include <n_buffer.h>
 
 namespace naive {
 
-    // heap array implementation
+    // heap array implementation with strong exception safety
 
     template<class T, class Allocator = naive::allocator<T>>
-    class array {
+    class array : protected array_raw_buffer<T, Allocator> {
+
     public:
-        using value_type = T;
+        using value_type = std::remove_cvref_t<T>;
         using size_type = std::size_t;
         using reference = value_type &;
         using const_reference = const value_type &;
@@ -25,64 +27,49 @@ namespace naive {
 
         // ctors and dtor
 
-        constexpr array() : size_(static_cast<size_type>(0)), buffer_(nullptr) {}
+        constexpr array() = default;
 
-        constexpr explicit array(size_type size) : size_(size), buffer_(construct_buffer_(size_)) {}
+        constexpr explicit array(size_type size) : array_raw_buffer<value_type>(size) {
+            for (size_type i = 0; i < size_; ++i) {
+                alloc_.construct(buffer_ + i);
+            }
+        }
 
-        constexpr array(size_type size, const Allocator &alloc) : alloc_(alloc), size_(size),
-                                                                  buffer_(construct_buffer_(size_)) {}
+        constexpr array(size_type size, const Allocator &alloc) : array_raw_buffer<value_type>(size, alloc) {
+            for (size_type i = 0; i < size_; ++i) {
+                alloc_.construct(buffer_ + i);
+            }
+        }
 
         constexpr array(size_type size, const value_type &val) : array(size) {
             std::fill(begin(), end(), val);
         }
 
-        constexpr array(std::initializer_list<value_type> il) : array(il.size()) {
-            std::copy(il.begin(), il.end(), begin());
+        constexpr array(std::initializer_list<value_type> il) : array_raw_buffer<value_type>(il.size()) {
+            auto it = il.begin();
+            for (size_type i = 0; i < size_; ++i) {
+                alloc_.construct(buffer_ + i, *it++);
+            }
         }
 
-        constexpr array(const array &other) : alloc_(other.alloc_), size_(other.size_),
-                                              buffer_(construct_buffer_(size_)) {
-            std::copy(other.begin(), other.end(), begin());
+        constexpr array(const array &other) : array_raw_buffer<value_type>(other.size()) {
+            for (size_type i = 0; i < size_; ++i) {
+                alloc_.construct(buffer_ + i, other.buffer_[i]);
+            }
         }
 
         constexpr array &operator=(const array &other) {
-            if (this == &other) {
-                return *this;
-            }
-            if (alloc_ != other.alloc_) {
-                alloc_ = other.alloc_;
-            }
-            if (size() != other.size()) {
-                destruct_buffer_(buffer_, size());
-                buffer_ = construct_buffer_(other.size());
-                size_ = other.size();
-            }
-            std::copy(other.begin(), other.end(), begin());
+            // TODO: may be inefficient if size == other.size
+            array copy = other;
+            std::swap(*this, copy);
             return *this;
         }
 
-        constexpr array(array &&other) noexcept:
-                alloc_(std::move(other.alloc_)),
-                size_(std::exchange(other.size_, static_cast<size_type>(0))),
-                buffer_(std::exchange(other.buffer_, nullptr)) {}
+        constexpr array(array &&other) noexcept = default;
 
-        constexpr array &operator=(array &&other) noexcept {
-            if (this == &other) {
-                return *this;
-            }
+        constexpr array &operator=(array &&other) noexcept = default;
 
-            destruct_buffer_(buffer_, size_);
-
-            alloc_ = std::move(alloc_);
-            size_ = std::exchange(other.size_, static_cast<size_type>(0));
-            buffer_ = std::exchange(other.buffer_, nullptr);
-
-            return *this;
-        }
-
-        constexpr ~array() {
-            destruct_buffer_(buffer_, size_);
-        }
+        constexpr ~array() = default;
 
         // element access
 
@@ -158,27 +145,11 @@ namespace naive {
         }
 
     private:
-        Allocator alloc_;
-        size_type size_;
-        pointer buffer_;
+        using arb = array_raw_buffer<T, Allocator>;
 
-        using alloc_ptr = decltype(alloc_)::pointer;
-
-        template<class ... Args>
-        constexpr alloc_ptr construct_buffer_(size_type count, Args &&... args) {
-            auto buffer = alloc_.allocate(count);
-            for (size_type i = 0; i < count; ++i) {
-                alloc_.construct(buffer + i, std::forward<Args>(args)...);
-            }
-            return buffer;
-        }
-
-        constexpr void destruct_buffer_(pointer buffer, size_type count) {
-            for (size_type i = 0; i < count; ++i) {
-                alloc_.destroy(buffer + i);
-            }
-            alloc_.deallocate(buffer, count);
-        }
+        using arb::alloc_;
+        using arb::size_;
+        using arb::buffer_;
     };
 
     // print
